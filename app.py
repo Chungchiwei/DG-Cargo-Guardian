@@ -4,7 +4,7 @@
 
 import streamlit as st
 from ems_engine import query_ems, format_ems_report
-from ai_analyzer import analyze_incident, ask_dg_question, check_segregation
+from ai_analyzer import analyze_incident, ask_dg_question, check_segregation , INCIDENT_SOP_MAP
 # ── 積載隔離輔助函數 ─────────────────────────────────────────
 
 def _validate_position(pos: str) -> bool:
@@ -16,9 +16,29 @@ def _format_position(pos: str) -> str:
     """將 BBRRTT 轉為可讀格式"""
     if not _validate_position(pos):
         return pos
-    bb, rr, tt = pos[0:2], pos[2:4], pos[4:6]
-    tier_desc = "艙內" if int(tt) < 80 else "甲板上"
-    return f"Bay{bb} Row{rr} Tier{tt}({tier_desc})"
+
+    bb  = pos[0:2]
+    rr  = pos[2:4]
+    tt  = pos[4:6]
+    rr_int = int(rr)
+    tt_int = int(tt)
+
+    # Row 描述：00=中心線，雙數=左舷，單數=右舷
+    if rr_int == 0:
+        row_desc = "中心線"
+    elif rr_int % 2 == 0:
+        row_desc = f"左舷第{(rr_int // 2)}列"
+    else:
+        row_desc = f"右舷第{(rr_int // 2)}列"
+
+    # Tier 描述：02–08=艙內，82起=甲板上第1層
+    if tt_int < 80:
+        tier_desc = f"艙內第{(tt_int - 2) // 2 + 1}層"
+    else:
+        tier_desc = f"甲板上第{(tt_int - 82) // 2 + 1}層"
+
+    return f"Bay{bb} Row{rr}({row_desc}) Tier{tt}({tier_desc})"
+
 
 
 def _calc_distance(pos_a: str, pos_b: str) -> str:
@@ -429,15 +449,55 @@ elif page == "🤖 AI 事故分析":
         )
     with col2:
         incident_type = st.selectbox(
-            "事故類型",
-            options=["fire", "spillage", "first_aid", "general"],
-            format_func=lambda x: {
-                "fire":      "🔥 火災事故",
-                "spillage":  "💧 洩漏事故",
-                "first_aid": "🏥 人員傷亡急救",
-                "general":   "📋 一般查詢"
-            }[x]
-        )
+        "事故類型",
+        options=[
+            "deck_container_fire",
+            "hold_container_fire",
+            "engine_room_fire",
+            "cargo_leakage",
+            "container_overboard",
+            "fire",
+            "spillage",
+            "first_aid",
+            "general",
+        ],
+        format_func=lambda x: {
+            "deck_container_fire": "🔥 甲板貨櫃失火（WHL 3-3）",
+            "hold_container_fire": "🔥 貨艙貨櫃失火（WHL 3-4）",
+            "engine_room_fire":    "🔥 機艙失火（WHL 1-5）",
+            "cargo_leakage":       "💧 貨櫃洩漏 氣體/液體（WHL 3-5）",
+            "container_overboard": "📦 貨櫃落海/傾倒/位移（WHL 3-2）",
+            "fire":                "🔥 火災事故（一般）",
+            "spillage":            "💧 洩漏事故（一般）",
+            "first_aid":           "🏥 人員傷亡急救（MFAG）",
+            "general":             "📋 一般查詢",
+        }[x],
+        label_visibility="collapsed"
+    )
+
+    # ── SOP 參考標籤（顯示在 selectbox 下方）──
+    sop_badges = {
+        "deck_container_fire": ("3-3", "#dc2626"),
+        "hold_container_fire": ("3-4", "#b45309"),
+        "engine_room_fire":    ("1-5", "#7c3aed"),
+        "cargo_leakage":       ("3-5", "#0369a1"),
+        "container_overboard": ("3-2", "#047857"),
+        "fire":                ("IMDG", "#dc2626"),
+        "spillage":            ("IMDG", "#0369a1"),
+        "first_aid":           ("MFAG", "#047857"),
+        "general":             ("IMDG", "#475569"),
+    }
+    badge_code, badge_color = sop_badges.get(incident_type, ("IMDG", "#475569"))
+    st.markdown(
+        f'<div style="margin-top:-8px; margin-bottom:8px;">'
+        f'<span style="background:{badge_color}; color:#fff; font-size:0.72rem;'
+        f'font-weight:700; padding:3px 10px; border-radius:4px;'
+        f'letter-spacing:1px;">WHL SOP {badge_code}</span>'
+        f'&nbsp;<span style="font-size:0.78rem; color:#64748b;">'
+        f'參考：{INCIDENT_SOP_MAP.get(incident_type, "IMDG Code")}</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
     additional = st.text_area(
         "額外情境說明（選填）",
@@ -490,13 +550,13 @@ elif page == "🔄 積載隔離檢查":
         st.markdown("""
         | 欄位 | 說明 | 範例 |
         |------|------|------|
-        | **BB** | Bay（貝位，船身前後位置） | 01, 03, 05… |
-        | **RR** | Row（列位，左右位置） | 01=左最外, 00=中心線 |
-        | **TT** | Tier（層位，上下位置） | 02=最底層, 82=甲板上 |
+        | **BB** | Bay（貝位，船身前後位置） | 02, 06, 10… |
+        | **RR** | Row（列位，左右位置） | 00=中心線, 02=左舷第1列, 01=右舷第1列 |
+        | **TT** | Tier（層位，上下位置） | 02=艙內最底層, 82=甲板上第1層 |
 
-        **完整範例：** `030282` = Bay 03, Row 02, Tier 82（甲板上第二層）
-        
-        > Tier 02–08 為艙內，82 以上為甲板上
+        **完整範例：** `030282` = Bay 03, Row 02（左舷第1列）, Tier 82（甲板上第1層）
+
+        > Tier 02–08 為艙內，82 以上為甲板上（每層遞增 2）
         """)
 
     st.markdown("---")
@@ -695,6 +755,35 @@ elif page == "💬 自由問答":
             placeholder="填入後 AI 會參考該危險品資料回答",
             key="chat_un"
         )
+    st.markdown(
+        '<div style="font-size:0.72rem; color:#475569; text-transform:uppercase;'
+        'letter-spacing:1.5px; margin:10px 0 6px 0;">📖 WHL SOP 快捷問題</div>',
+        unsafe_allow_html=True
+    )
+
+    quick_questions = {
+        "🔥 甲板貨櫃失火，CO2 釋放前需確認哪些事項？":
+            "依 WHL 3-3，甲板貨櫃失火時，CO2 釋放前需確認哪些事項？請逐條列出。",
+        "💧 貨艙失火，何時應放棄探火直接釋放 CO2？":
+            "依 WHL 3-4，貨艙貨櫃失火時，何種情況下應放棄探火，直接釋放 CO2？",
+        "🔧 機艙失火，CO2 釋放後需密封多久？":
+            "依 WHL 1-5，機艙失火釋放 CO2 後，機艙需保持密封多少小時？原因為何？",
+        "📦 貨櫃落海，惡劣天候甲板作業需符合哪些條件？":
+            "依 WHL 3-2，貨櫃落海後派員至甲板作業，需符合哪些安全條件？",
+        "☎️ 緊急事故發生後，何時需通知海技部？":
+            "WHL 各類緊急事故（失火/洩漏/落海），通知海技部（Maritech Division）的時機與內容要點為何？",
+    }
+
+    cols = st.columns(2)
+    for i, (btn_label, question_text) in enumerate(quick_questions.items()):
+        with cols[i % 2]:
+            if st.button(btn_label, use_container_width=True, key=f"quick_q_{i}"):
+                # 直接觸發問答
+                st.session_state.chat_history.append({
+                    "role": "user", "content": question_text
+                })
+                st.rerun()
+
 
     # 輸入框
     user_input = st.chat_input("輸入你的問題，例如：Class 3 危險品的主要火災風險是什麼？")
