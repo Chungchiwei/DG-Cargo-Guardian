@@ -3551,8 +3551,66 @@
     "spillage": "消除所有火源，通風，使用沙土或惰性吸附材料收集，防止進入下水道及低窪處",
     "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，大量誤食就醫"
   }
-}
+},
+"UN2357": {
+  "proper_shipping_name": "CYCLOHEXYLAMINE",
+  "class": "8",
+  "subsidiary_risk": ["3"],
+  "packing_group": "II",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "132",
+  "stowage_segregation": "Category B",
+  "special_provisions": [],
+  "description": "環己胺，腐蝕性兼易燃液體，鍋爐水處理劑、橡膠硫化促進劑及農藥中間體，具強烈氨臭味，蒸氣比空氣重，對皮膚及眼睛有強烈腐蝕性，可經皮膚吸收，蒸氣具刺激性及毒性",
+  "flashpoint": "31°C",
+  "boiling_point": "134°C",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧、乾粉或 CO₂，禁止使用直射水柱，防止廢水污染環境，注意蒸氣積聚",
+    "spillage": "穿戴全套防護裝備（耐鹼手套、護目鏡、面罩），消除所有火源，使用惰性吸附材料收集，防止進入下水道，大量清水沖洗污染區域",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，吸入蒸氣移至新鮮空氣，立即就醫"
+  }
+},
 
+"UN2674": {
+  "proper_shipping_name": "SODIUM FLUOROSILICATE",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "154",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "氟矽酸鈉，毒性固體，飲用水氟化、玻璃蝕刻及農藥原料，含氟離子具全身性毒性，可影響骨骼及牙齒，長期暴露導致氟中毒，燃燒或受強酸分解釋放氟化氫（HF）有毒氣體",
+  "flashpoint": "N/A",
+  "boiling_point": "分解溫度約 300°C",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，防止廢水污染水源，注意受熱分解釋放氟化氫有毒氣體",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡），防止粉塵飛揚，使用濕式清掃，收集散落物密封，防止進入水道及土壤",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食立即就醫（注意氟離子全身性毒性，需監測血鈣濃度）"
+  }
+},
+
+"UN2215": {
+  "proper_shipping_name": "MALEIC ANHYDRIDE",
+  "class": "8",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "153",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "順丁烯二酸酐（馬來酸酐），腐蝕性固體，不飽和聚酯樹脂、農藥及塗料原料，熔點 53°C（低熔點，夏季高溫可能液化），對皮膚、眼睛及呼吸道有強烈腐蝕及刺激性，粉塵具致敏性，可能引發哮喘",
+  "flashpoint": "102°C",
+  "boiling_point": "202°C",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，禁止使用直射水柱（與水反應生成腐蝕性馬來酸），防止廢水污染環境",
+    "spillage": "穿戴全套防護裝備（耐酸手套、護目鏡、面罩），防止粉塵飛揚，使用惰性吸附材料收集，禁止以水直接沖洗（生成腐蝕性液體），防止進入下水道",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，吸入粉塵或蒸氣立即就醫（注意遲發性呼吸道致敏反應）"
+  }
+}
 
 
 }
