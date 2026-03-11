@@ -126,7 +126,7 @@ with st.sidebar:
         options=[
             "🔍 EMS 快速查詢",
             "🤖 AI 事故分析",
-            "🔄 積載相容性檢查",
+            "🔄 積載隔離檢查",
             "💬 自由問答"
         ],
         label_visibility="collapsed"
