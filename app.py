@@ -834,11 +834,11 @@ elif page == "🗺️ DG Bay Plan":
             st.caption(f"🚢 {ship}　|　航次：{voy}")
 
     m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("總貨物數",     summary["total"])
-    m2.metric("🟢 可用水",    summary["by_color"]["green"])
-    m3.metric("🟡 非水介質",  summary["by_color"]["yellow"])
-    m4.metric("🔴 禁水/高危", summary["by_color"]["red"])
-    m5.metric("⚫ 未知",      summary["by_color"]["grey"])
+    m1.metric("🚢 全船裝載 DG 總數",          summary["total"])
+    m2.metric("🟢 可用皮龍水柱滅火 (EMS F-A)",    summary["by_color"]["green"])
+    m3.metric("🟡 使用滅火器滅火(CO2 / 乾粉) (EMS F-B~E)",  summary["by_color"]["yellow"])
+    m4.metric("🔴 高危險碰水會產生化學反應 (EMS F-G+)", summary["by_color"]["red"])
+    m5.metric("⚫ EMS 資料不完全",               summary["by_color"]["grey"])
 
     if summary["no_position"] > 0:
         st.warning(
@@ -905,7 +905,7 @@ elif page == "🗺️ DG Bay Plan":
     # 區塊 B：Bay Plan 視覺化（只顯示甲板）
     # ════════════════════════════════════════════════════════
     st.markdown("---")
-    st.markdown("#### 🗺️ Bay Plan 視覺化（甲板 On Deck）")
+    st.markdown("#### 🗺️ Bay Plan 危險櫃裝載視覺化")
     st.caption("依 IMDG 規定，危險品均積載於甲板，本圖僅顯示甲板層")
 
     if not bay_plan:
@@ -1085,7 +1085,7 @@ elif page == "🗺️ DG Bay Plan":
     with col_f1:
         filter_color = st.multiselect(
             "依滅火分類篩選",
-            options=["🟢 可用水", "🟡 非水介質", "🔴 禁水/高危", "⚫ 未知"],
+            options=["🟢 可用皮龍水柱滅火", "🟡 使用滅火器滅火", "🔴 高危險碰水會產生化學反應", "⚫ EMS 資料不完全"],
             default=[],
             key="filter_color"
         )
@@ -1111,10 +1111,10 @@ elif page == "🗺️ DG Bay Plan":
         )
 
     color_label_map = {
-        "🟢 可用水":    "green",
-        "🟡 非水介質":  "yellow",
-        "🔴 禁水/高危": "red",
-        "⚫ 未知":      "grey",
+        "🟢 可用皮龍水柱滅火":    "green",
+        "🟡 使用滅火器滅火(CO2 / 乾粉)":  "yellow",
+        "🔴 高危險碰水會產生化學反應": "red",
+        "⚫ EMS 資料不完全":      "grey",
     }
     filtered = cargo_list
     if filter_color:
@@ -1142,11 +1142,10 @@ elif page == "🗺️ DG Bay Plan":
 
     def _highlight_row(row):
         color_map = {
-            "可用水":       "background-color: #dcfce7; color: #166534",
-            "非水介質":     "background-color: #fef9c3; color: #854d0e",
-            "⛔ 禁水":      "background-color: #fee2e2; color: #991b1b",
-            "⛔ 禁水/高危": "background-color: #fee2e2; color: #991b1b",
-            "未知":         "background-color: #f3f4f6; color: #374151",
+            "可用皮龍水柱滅火":       "background-color: #dcfce7; color: #166534",
+            "使用滅火器滅火(CO2 / 乾粉)":     "background-color: #fef9c3; color: #854d0e",
+            "高危險碰水會產生化學反應水":      "background-color: #fee2e2; color: #991b1b",
+            "資料不完全":         "background-color: #f3f4f6; color: #374151",
         }
         return [color_map.get(row["滅火分類"], "")] * len(row)
 
