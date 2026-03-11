@@ -5,6 +5,159 @@
 import streamlit as st
 from ems_engine import query_ems, format_ems_report
 from ai_analyzer import analyze_incident, ask_dg_question, check_segregation
+# ── 積載隔離輔助函數 ─────────────────────────────────────────
+
+def _validate_position(pos: str) -> bool:
+    """驗證 BBRRTT 格式：6位純數字"""
+    return len(pos) == 6 and pos.isdigit()
+
+
+def _format_position(pos: str) -> str:
+    """將 BBRRTT 轉為可讀格式"""
+    if not _validate_position(pos):
+        return pos
+    bb, rr, tt = pos[0:2], pos[2:4], pos[4:6]
+    tier_desc = "艙內" if int(tt) < 80 else "甲板上"
+    return f"Bay{bb} Row{rr} Tier{tt}({tier_desc})"
+
+
+def _calc_distance(pos_a: str, pos_b: str) -> str:
+    """
+    計算兩個貨櫃位置的大略距離描述
+    Bay 差距 × 6m + Row 差距 × 2.4m
+    """
+    if not (_validate_position(pos_a) and _validate_position(pos_b)):
+        return "未知"
+
+    bay_a, row_a, tier_a = int(pos_a[0:2]), int(pos_a[2:4]), int(pos_a[4:6])
+    bay_b, row_b, tier_b = int(pos_b[0:2]), int(pos_b[2:4]), int(pos_b[4:6])
+
+    # Bay 間距約 6m（每個 Bay 含間隔），Row 間距約 2.4m
+    bay_dist  = abs(bay_a - bay_b) * 6.0
+    row_dist  = abs(row_a - row_b) * 2.4
+    tier_dist = abs(tier_a - tier_b) * 2.6
+
+    total = (bay_dist**2 + row_dist**2 + tier_dist**2) ** 0.5
+
+    # 同一位置
+    if total == 0:
+        return "同一位置"
+    elif total < 3:
+        return f"約 {total:.1f}m（緊鄰）"
+    elif total < 12:
+        return f"約 {total:.1f}m（近距）"
+    else:
+        return f"約 {total:.1f}m"
+
+
+def _render_position_map(cargos: list):
+    """
+    用 Streamlit 繪製簡易 Bay/Row 平面示意圖
+    """
+    import pandas as pd
+
+    # 收集所有 Bay 和 Row
+    positions = []
+    for c in cargos:
+        pos = c["position"]
+        if _validate_position(pos):
+            positions.append({
+                "label":    c["label"],
+                "un":       c["un"],
+                "bay":      int(pos[0:2]),
+                "row":      int(pos[2:4]),
+                "tier":     int(pos[4:6]),
+                "on_deck":  int(pos[4:6]) >= 80,
+                "class":    c["data"]["hazard_class"]
+            })
+
+    if not positions:
+        return
+
+    # 建立簡易網格顯示
+    all_bays = sorted(set(p["bay"] for p in positions))
+    all_rows = sorted(set(p["row"] for p in positions))
+
+    # 用 DataFrame 呈現
+    grid = {}
+    for bay in all_bays:
+        col_data = {}
+        for row in all_rows:
+            items = [p for p in positions if p["bay"] == bay and p["row"] == row]
+            if items:
+                col_data[f"Row {row:02d}"] = " / ".join(
+                    f"{p['label']}(UN{p['un']})" for p in items
+                )
+            else:
+                col_data[f"Row {row:02d}"] = "—"
+        grid[f"Bay {bay:02d}"] = col_data
+
+    df = pd.DataFrame(grid).T
+    st.dataframe(df, use_container_width=True)
+
+    # 圖例
+    cols = st.columns(len(cargos))
+    colors = ["🔴", "🔵", "🟢", "🟡", "🟠", "🟣", "⚫", "⚪", "🟤", "🔶"]
+    for i, cargo in enumerate(cargos):
+        pos = cargo["position"]
+        if _validate_position(pos):
+            cols[i].caption(
+                f"{colors[i % len(colors)]} {cargo['label']} | "
+                f"UN{cargo['un']} | "
+                f"{_format_position(pos)}"
+            )
+
+
+def _generate_report(cargos: list, results: list, violation_count: int) -> str:
+    """產生純文字隔離檢查報告"""
+    from datetime import datetime
+
+    lines = [
+        "=" * 60,
+        "  DG CARGO GUARDIAN — 積載隔離檢查報告",
+        f"  產生時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "=" * 60,
+        "",
+        "【貨物清單】",
+    ]
+
+    for c in cargos:
+        lines.append(
+            f"  {c['label']:6s} | UN{c['un']:4s} | "
+            f"{c['data']['proper_shipping_name'][:35]:35s} | "
+            f"Class {c['data']['hazard_class']:4s} | "
+            f"位置：{_format_position(c['position'])}"
+        )
+
+    lines += [
+        "",
+        f"【檢查結果摘要】共 {len(results)} 組配對，{violation_count} 項違規",
+        "",
+    ]
+
+    for res in results:
+        is_v = any(
+            kw in res["result"]
+            for kw in ["違規", "違反", "不得", "禁止", "VIOLATION", "❌"]
+        )
+        lines += [
+            "-" * 60,
+            f"{'🚨 [違規]' if is_v else '✅ [合規]'}  "
+            f"{res['label_a']}(UN{res['un_a']} @ {res['pos_a']})  ×  "
+            f"{res['label_b']}(UN{res['un_b']} @ {res['pos_b']})",
+            f"距離：{_calc_distance(res['pos_a'], res['pos_b'])}",
+            "",
+            res["result"],
+            "",
+        ]
+
+    lines += [
+        "=" * 60,
+        "⚠️  本報告僅供參考，實際操作請依 IMDG Code 官方規定",
+        "=" * 60,
+    ]
+
+    return "\n".join(lines)
 
 # ── 頁面設定 ────────────────────────────────────────────────
 st.set_page_config(
@@ -330,45 +483,196 @@ elif page == "🤖 AI 事故分析":
 elif page == "🔄 積載隔離檢查":
 
     st.markdown('<div class="main-title">🔄 積載隔離檢查</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">檢查兩種危險品是否需要隔離</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">輸入 UN 號碼與貨櫃位置，檢查是否違反 IMDG 隔離規定</div>', unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### 危險品 A")
-        un_a = st.text_input("UN 號碼 A", placeholder="例如：1203", key="un_a")
-        if un_a:
-            data_a = query_ems(un_a.strip())
-            if data_a["found"]:
-                st.success(f"✅ {data_a['proper_shipping_name']} | Class {data_a['hazard_class']}")
+    # ── BBRRTT 格式說明 ──────────────────────────────────────
+    with st.expander("📖 貨櫃位置格式說明 (BBRRTT)"):
+        st.markdown("""
+        | 欄位 | 說明 | 範例 |
+        |------|------|------|
+        | **BB** | Bay（貝位，船身前後位置） | 01, 03, 05… |
+        | **RR** | Row（列位，左右位置） | 01=左最外, 00=中心線 |
+        | **TT** | Tier（層位，上下位置） | 02=最底層, 82=甲板上 |
+
+        **完整範例：** `030282` = Bay 03, Row 02, Tier 82（甲板上第二層）
+        
+        > Tier 02–08 為艙內，82 以上為甲板上
+        """)
+
+    st.markdown("---")
+
+    # ── 輸入區：支援多筆貨物 ────────────────────────────────
+    st.markdown("#### 📦 貨物清單")
+    st.caption("最多可新增 10 筆貨物，系統將逐一比對所有組合")
+
+    # Session State 管理貨物清單
+    if "cargo_list" not in st.session_state:
+        st.session_state.cargo_list = [
+            {"un": "", "position": "", "label": "貨物 1"},
+            {"un": "", "position": "", "label": "貨物 2"},
+        ]
+
+    # 新增 / 移除貨物按鈕
+    col_add, col_remove, col_clear = st.columns([1, 1, 2])
+    with col_add:
+        if st.button("➕ 新增貨物", use_container_width=True):
+            if len(st.session_state.cargo_list) < 10:
+                n = len(st.session_state.cargo_list) + 1
+                st.session_state.cargo_list.append(
+                    {"un": "", "position": "", "label": f"貨物 {n}"}
+                )
             else:
-                st.error("❌ 查無此 UN 號碼")
+                st.warning("最多 10 筆貨物")
+    with col_remove:
+        if st.button("➖ 移除最後一筆", use_container_width=True):
+            if len(st.session_state.cargo_list) > 2:
+                st.session_state.cargo_list.pop()
 
-    with col2:
-        st.markdown("#### 危險品 B")
-        un_b = st.text_input("UN 號碼 B", placeholder="例如：1017", key="un_b")
-        if un_b:
-            data_b = query_ems(un_b.strip())
-            if data_b["found"]:
-                st.success(f"✅ {data_b['proper_shipping_name']} | Class {data_b['hazard_class']}")
-            else:
-                st.error("❌ 查無此 UN 號碼")
+    st.markdown("")
 
-    check_btn = st.button("🔄 檢查相容性", type="primary", use_container_width=True)
+    # 貨物輸入表格
+    validated_cargos = []  # 通過驗證的貨物清單
 
-    if check_btn:
-        if not un_a or not un_b:
-            st.warning("⚠️ 請輸入兩個 UN 號碼")
+    for i, cargo in enumerate(st.session_state.cargo_list):
+        col_label, col_un, col_pos, col_status = st.columns([1, 2, 2, 3])
+
+        with col_label:
+            st.markdown(f"<br><b>{cargo['label']}</b>", unsafe_allow_html=True)
+
+        with col_un:
+            un_val = st.text_input(
+                f"UN 號碼",
+                value=cargo["un"],
+                placeholder="例：1203",
+                key=f"seg_un_{i}",
+                label_visibility="collapsed" if i > 0 else "visible"
+            )
+            st.session_state.cargo_list[i]["un"] = un_val
+
+        with col_pos:
+            pos_val = st.text_input(
+                f"位置 (BBRRTT)",
+                value=cargo["position"],
+                placeholder="例：030282",
+                key=f"seg_pos_{i}",
+                label_visibility="collapsed" if i > 0 else "visible",
+                max_chars=6
+            )
+            st.session_state.cargo_list[i]["position"] = pos_val
+
+        with col_status:
+            # 即時驗證輸入
+            if un_val and pos_val:
+                dg_data = query_ems(un_val.strip())
+                pos_valid = _validate_position(pos_val.strip())
+
+                if dg_data["found"] and pos_valid:
+                    st.success(
+                        f"✅ {dg_data['proper_shipping_name'][:25]}… "
+                        f"| Class {dg_data['hazard_class']} "
+                        f"| {_format_position(pos_val.strip())}",
+                        icon=None
+                    )
+                    validated_cargos.append({
+                        "label":    cargo["label"],
+                        "un":       un_val.strip(),
+                        "position": pos_val.strip(),
+                        "data":     dg_data
+                    })
+                elif not dg_data["found"]:
+                    st.error(f"❌ UN{un_val} 查無資料")
+                elif not pos_valid:
+                    st.warning("⚠️ 位置格式錯誤，請輸入6位數字")
+            elif un_val or pos_val:
+                st.caption("請同時填入 UN 號碼與位置")
+
+    st.markdown("---")
+
+    # ── 視覺化艙面示意圖 ────────────────────────────────────
+    if len(validated_cargos) >= 2:
+        st.markdown("#### 🗺️ 貨物位置示意")
+        _render_position_map(validated_cargos)
+
+    # ── 檢查按鈕 ─────────────────────────────────────────────
+    check_btn = st.button(
+        "🔄 執行隔離檢查",
+        type="primary",
+        use_container_width=True,
+        disabled=len(validated_cargos) < 2
+    )
+
+    if len(validated_cargos) < 2:
+        st.caption("⚠️ 請至少填入 2 筆有效貨物資料才能執行檢查")
+
+    if check_btn and len(validated_cargos) >= 2:
+        st.markdown("---")
+        st.markdown("#### 📊 隔離檢查結果")
+
+        # 逐一比對所有貨物組合
+        from itertools import combinations
+        pairs = list(combinations(validated_cargos, 2))
+
+        all_results   = []
+        violation_count = 0
+
+        for cargo_a, cargo_b in pairs:
+            with st.spinner(f"檢查 {cargo_a['label']} × {cargo_b['label']}..."):
+                result = check_segregation(
+                    un_a=cargo_a["un"],
+                    un_b=cargo_b["un"],
+                    pos_a=cargo_a["position"],
+                    pos_b=cargo_b["position"]
+                )
+                all_results.append({
+                    "label_a": cargo_a["label"],
+                    "label_b": cargo_b["label"],
+                    "un_a":    cargo_a["un"],
+                    "un_b":    cargo_b["un"],
+                    "pos_a":   cargo_a["position"],
+                    "pos_b":   cargo_b["position"],
+                    "result":  result
+                })
+
+                # 簡易判斷是否違規（根據 AI 回傳內容關鍵字）
+                if any(kw in result for kw in ["違規", "違反", "不得", "禁止", "VIOLATION", "❌"]):
+                    violation_count += 1
+
+        # 總結橫幅
+        if violation_count == 0:
+            st.success(f"✅ 共檢查 {len(pairs)} 組配對，**未發現隔離違規**")
         else:
-            st.markdown("---")
-            st.markdown("#### 🤖 AI 相容性分析")
+            st.error(f"🚨 共檢查 {len(pairs)} 組配對，發現 **{violation_count} 項隔離違規**，請立即處理！")
 
-            with st.spinner("AI 正在分析積載相容性..."):
-                result = check_segregation(un_a.strip(), un_b.strip())
+        # 逐組顯示結果
+        for res in all_results:
+            dist = _calc_distance(res["pos_a"], res["pos_b"])
+            is_violation = any(
+                kw in res["result"]
+                for kw in ["違規", "違反", "不得", "禁止", "VIOLATION", "❌"]
+            )
 
-            # ✅ 淺色背景容器 + st.markdown 渲染 Markdown 格式
-            st.markdown('<div class="ai-response-wrapper">', unsafe_allow_html=True)
-            st.markdown(result)
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.expander(
+                f"{'🚨' if is_violation else '✅'} "
+                f"{res['label_a']} (UN{res['un_a']} @ {res['pos_a']})  ×  "
+                f"{res['label_b']} (UN{res['un_b']} @ {res['pos_b']})  "
+                f"｜距離約 {dist}",
+                expanded=is_violation
+            ):
+                st.markdown('<div class="ai-response-wrapper">', unsafe_allow_html=True)
+                st.markdown(res["result"])
+                st.markdown('</div>', unsafe_allow_html=True)
+
+        # 匯出報告按鈕
+        st.markdown("---")
+        report_text = _generate_report(validated_cargos, all_results, violation_count)
+        st.download_button(
+            label="📥 下載完整隔離檢查報告",
+            data=report_text,
+            file_name="segregation_report.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
+
 
 
 # ══════════════════════════════════════════════════════════════

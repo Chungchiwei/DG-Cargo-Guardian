@@ -337,69 +337,119 @@ def ask_dg_question(
 # ── 相容性檢查模式 ───────────────────────────────────────────
 # ══════════════════════════════════════════════════════════════
 def check_segregation(
-    un_number_a: str,
-    un_number_b: str
+    un_a: str,
+    un_b: str,
+    pos_a: str = None,
+    pos_b: str = None
 ) -> str:
     """
-    檢查兩種危險品的積載相容性（強化版）
-
-    Args:
-        un_number_a: 第一種危險品 UN 號碼
-        un_number_b: 第二種危險品 UN 號碼
-
-    Returns:
-        AI 相容性分析建議
+    檢查兩種危險品的積載相容性。
+    若提供 pos_a / pos_b（BBRRTT格式），額外分析實際距離是否符合隔離要求。
     """
-    data_a = query_ems(un_number_a)
-    data_b = query_ems(un_number_b)
+    from ems_engine import query_ems
 
-    report_a = format_ems_report(data_a)
-    report_b = format_ems_report(data_b)
+    data_a = query_ems(un_a)
+    data_b = query_ems(un_b)
 
-    user_prompt = f"""
-請分析以下兩種危險品的積載相容性（Segregation Analysis）：
+    # 組合貨物資訊
+    def _cargo_summary(un, data):
+        if not data["found"]:
+            return f"UN{un}（查無資料）"
+        return (
+            f"UN{un} {data['proper_shipping_name']} | "
+            f"Class {data['hazard_class']} | "
+            f"Subsidiary Risk: {data.get('subsidiary_risk', [])} | "
+            f"Stowage: {data.get('stowage', 'N/A')}"
+        )
 
-【危險品 A — UN{un_number_a}】
-{report_a}
+    summary_a = _cargo_summary(un_a, data_a)
+    summary_b = _cargo_summary(un_b, data_b)
 
-【危險品 B — UN{un_number_b}】
-{report_b}
+    # 位置資訊
+    position_context = ""
+    if pos_a and pos_b:
+        def _parse_pos(pos):
+            return {
+                "bay":     int(pos[0:2]),
+                "row":     int(pos[2:4]),
+                "tier":    int(pos[4:6]),
+                "on_deck": int(pos[4:6]) >= 80
+            }
 
----
-請提供完整的積載相容性分析報告，格式如下：
+        pa = _parse_pos(pos_a)
+        pb = _parse_pos(pos_b)
 
-## 🔄 積載相容性分析報告
+        bay_diff  = abs(pa["bay"]  - pb["bay"])
+        row_diff  = abs(pa["row"]  - pb["row"])
+        tier_diff = abs(pa["tier"] - pb["tier"])
 
-### ⚖️ 相容性判定結果
-- 判定結論：✅ 可同艙積載 / ⚠️ 有條件積載 / ❌ 禁止同艙積載
-- 判定依據（引用 IMDG 規範條款）
+        same_bay    = bay_diff == 0
+        same_row    = row_diff == 0
+        adjacent    = bay_diff <= 1 and row_diff <= 1
+        a_on_deck   = pa["on_deck"]
+        b_on_deck   = pb["on_deck"]
+        both_deck   = a_on_deck and b_on_deck
+        cross_deck  = a_on_deck != b_on_deck  # 一個艙內一個甲板上
 
-### ☢️ 混合危險反應分析
-- 兩者接觸可能產生的化學反應
-- 反應產物及其危害
-- 危險發生的條件（溫度、濕度、濃度等）
+        position_context = f"""
+## 📍 實際位置資訊
 
-### 📏 隔離要求
-- IMDG 隔離等級（Segregation Group）
-- 最小隔離距離或隔離方式
-- 特殊積載條件
+| 項目 | 貨物 A | 貨物 B |
+|------|--------|--------|
+| 位置代碼 | {pos_a} | {pos_b} |
+| Bay | {pa['bay']:02d} | {pb['bay']:02d} |
+| Row | {pa['row']:02d} | {pb['row']:02d} |
+| Tier | {pa['tier']:02d} | {pb['tier']:02d} |
+| 位置 | {'甲板上' if a_on_deck else '艙內'} | {'甲板上' if b_on_deck else '艙內'} |
 
-### 🚢 建議積載方案
-- 推薦的艙位配置
-- 額外安全措施
-- 監控要求
+**位置關係：**
+- Bay 差距：{bay_diff} 個 Bay（約 {bay_diff * 6}m）
+- Row 差距：{row_diff} 個 Row（約 {row_diff * 2.4}m）
+- 是否同一 Bay：{'是' if same_bay else '否'}
+- 是否緊鄰：{'是（高風險）' if adjacent else '否'}
+- 艙內/甲板：{'兩者均在甲板上' if both_deck else ('一艙內一甲板' if cross_deck else '兩者均在艙內')}
 
-### ⛔ 積載禁忌
-⛔ 禁止...（原因）
-
-### 📋 相關 IMDG 規範參考
-- 適用條款列表
-
----
-⚠️ **免責聲明**：以上分析僅供參考，實際積載須依官方 IMDG Code 最新版本及船旗國規定執行。
+請根據以上位置關係，結合 IMDG Code 隔離要求，判斷：
+1. 此距離是否滿足所需隔離等級（Away from / Separated from / Separated by a complete compartment / Separated longitudinally）
+2. 艙內/甲板的配置是否符合規定
+3. 是否存在違規，並明確標示 ❌ 違規 或 ✅ 合規
 """
 
+    prompt = f"""
+你是 IMDG Code 積載隔離專家。請根據以下資訊，詳細分析兩種危險品的積載相容性。
+
+## 貨物資訊
+- **貨物 A**：{summary_a}
+- **貨物 B**：{summary_b}
+
+{position_context}
+
+## 請依序分析以下項目：
+
+### 1. 隔離要求判定
+根據 IMDG Code Segregation Table，這兩種危險品的隔離要求是什麼？
+（Away from / Separated from / Separated by a complete compartment or hold / Separated longitudinally）
+
+### 2. 位置合規性評估
+{'根據上方提供的實際位置，評估目前配置是否符合隔離要求。' if pos_a and pos_b else '（未提供位置資訊，僅分析理論隔離要求）'}
+
+### 3. 違規判定
+明確標示：
+- ✅ **合規** — 符合 IMDG 隔離要求
+- ❌ **違規** — 違反 IMDG 隔離要求（說明違反哪條規定）
+
+### 4. 風險說明
+說明若兩者未正確隔離，可能發生的危險情境。
+
+### 5. 建議措施
+若違規，建議如何調整貨物位置以符合規定。
+
+請以繁體中文回答，格式清晰，重點加粗。
+"""
+
+    # ✅ 修正：改用專案統一的 get_llm_response()
     return get_llm_response(
         system_prompt=SYSTEM_PROMPT,
-        user_message=user_prompt
+        user_message=prompt
     )
+
