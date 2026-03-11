@@ -2696,8 +2696,867 @@
       "spillage": "穿戴全套防護裝備，使用弱酸小心中和，或大量清水稀釋，防止進入水道",
       "first_aid": "皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，立即就醫"
     }
+  },
+  "UN1266": {
+    "proper_shipping_name": "PERFUMERY PRODUCTS",
+    "class": "3",
+    "subsidiary_risk": [],
+    "packing_group": "II",
+    "ems_fire": "F-E",
+    "ems_spillage": "S-E",
+    "mfag": "127",
+    "stowage_segregation": "Category A",
+    "special_provisions": ["163", "367"],
+    "description": "香水製品（含易燃溶劑），易燃液體，包含香水、古龍水等，蒸氣比空氣重",
+    "flashpoint": "< 60°C",
+    "boiling_point": "N/A",
+    "emergency_action": {
+      "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻周圍",
+      "spillage": "消除火源，通風，使用惰性吸附材料收集，防止進入排水系統",
+      "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，就醫"
+    }
+  },
+  "UN2822": {
+    "proper_shipping_name": "2-CHLOROPYRIDINE",
+    "class": "6.1",
+    "subsidiary_risk": ["3"],
+    "packing_group": "II",
+    "ems_fire": "F-E",
+    "ems_spillage": "S-D",
+    "mfag": "131",
+    "stowage_segregation": "Category B",
+    "special_provisions": [],
+    "description": "2-氯吡啶，毒性且易燃液體，農藥及醫藥中間體，具皮膚及眼睛刺激性",
+    "flashpoint": "27°C",
+    "boiling_point": "170°C",
+    "emergency_action": {
+      "fire": "使用泡沫、乾粉或 CO₂，穿戴全套防護裝備，禁止使用直射水柱",
+      "spillage": "消除火源，穿戴全套防護裝備，通風，使用沙土吸收，防止進入水道",
+      "first_aid": "立即移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，立即就醫"
+    }
+  },
+  "UN1030": {
+    "proper_shipping_name": "DIFLUOROETHANE (HFC-152a)",
+    "class": "2.1",
+    "subsidiary_risk": [],
+    "packing_group": "N/A",
+    "ems_fire": "F-D",
+    "ems_spillage": "S-U",
+    "mfag": "115",
+    "stowage_segregation": "Category E",
+    "special_provisions": ["23"],
+    "description": "二氟乙烷（HFC-152a），易燃液化氣體，冷媒及噴霧推進劑，蒸氣比空氣重",
+    "flashpoint": "N/A",
+    "boiling_point": "-25°C",
+    "emergency_action": {
+      "fire": "若安全可關閉氣源，使用水霧冷卻容器，乾粉滅火，禁止使用 CO₂",
+      "spillage": "消除所有火源，疏散區域，穿戴 SCBA，使用水霧稀釋蒸氣，防止進入低窪處",
+      "first_aid": "移至新鮮空氣，凍傷以溫水復溫，若窒息進行人工呼吸，立即就醫"
+    }
+  },
+  "UN1180": {
+    "proper_shipping_name": "ETHYL BUTYRATE",
+    "class": "3",
+    "subsidiary_risk": [],
+    "packing_group": "III",
+    "ems_fire": "F-E",
+    "ems_spillage": "S-E",
+    "mfag": "127",
+    "stowage_segregation": "Category A",
+    "special_provisions": [],
+    "description": "丁酸乙酯，易燃液體，具果香氣味，食品香料及工業溶劑用途",
+    "flashpoint": "26°C",
+    "boiling_point": "121°C",
+    "emergency_action": {
+      "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻",
+      "spillage": "消除火源，通風，使用沙土吸收，防止進入下水道",
+      "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗，就醫"
+    }
+  },
+  "UN1816": {
+    "proper_shipping_name": "PROPYLTRICHLOROSILANE",
+    "class": "8",
+    "subsidiary_risk": ["3"],
+    "packing_group": "II",
+    "ems_fire": "F-E",
+    "ems_spillage": "S-B",
+    "mfag": "155",
+    "stowage_segregation": "Category E",
+    "special_provisions": [],
+    "description": "丙基三氯矽烷，腐蝕性且易燃液體，遇水劇烈反應生成鹽酸，矽烷偶聯劑原料",
+    "flashpoint": "37°C",
+    "boiling_point": "123°C",
+    "emergency_action": {
+      "fire": "使用乾粉或 CO₂，禁止使用水或泡沫（遇水反應），穿戴全套防護裝備",
+      "spillage": "禁止接觸水，穿戴全套防護裝備，使用乾沙或惰性材料吸收，防止進入水道",
+      "first_aid": "皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，立即就醫"
+    }
+  },
+  "UN3286": {
+    "proper_shipping_name": "FLAMMABLE LIQUID, TOXIC, CORROSIVE, N.O.S.",
+    "class": "3",
+    "subsidiary_risk": ["6.1", "8"],
+    "packing_group": "I",
+    "ems_fire": "F-E",
+    "ems_spillage": "S-D",
+    "mfag": "131",
+    "stowage_segregation": "Category E",
+    "special_provisions": ["274"],
+    "description": "易燃毒性腐蝕性液體（未另列名），三重危險，依實際成分而異，危險性極高",
+    "flashpoint": "< 60°C",
+    "boiling_point": "N/A",
+    "emergency_action": {
+      "fire": "使用泡沫、乾粉或 CO₂，穿戴 SCBA 全套防護裝備，禁止使用直射水柱",
+      "spillage": "穿戴 SCBA 全套防護裝備，消除火源，使用沙土吸收，防止進入水道，通報相關機關",
+      "first_aid": "立即移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，立即就醫"
+    }
+  },
+  "UN1727": {
+    "proper_shipping_name": "AMMONIUM HYDROGENDIFLUORIDE, SOLID",
+    "class": "8",
+    "subsidiary_risk": ["6.1"],
+    "packing_group": "II",
+    "ems_fire": "F-A",
+    "ems_spillage": "S-B",
+    "mfag": "154",
+    "stowage_segregation": "Category E",
+    "special_provisions": [],
+    "description": "二氟化氫銨（固體），腐蝕性且有毒固體，溶於水生成氟化氫，玻璃蝕刻及金屬清洗用途，皮膚接觸可致嚴重灼傷",
+    "flashpoint": "N/A",
+    "boiling_point": "240°C（分解）",
+    "emergency_action": {
+      "fire": "使用水霧或 CO₂，穿戴 SCBA 全套防護裝備，禁止靠近洩漏點",
+      "spillage": "穿戴 SCBA 全套防護裝備，使用石灰中和，大量清水沖洗，防止進入水道，通報相關機關",
+      "first_aid": "皮膚接觸立即以大量清水沖洗20分鐘，立即塗抹葡萄糖酸鈣凝膠，緊急送醫（可致命）"
+    }
+  },
+  "UN2621": {
+    "proper_shipping_name": "ACETYL METHYL CARBINOL",
+    "class": "3",
+    "subsidiary_risk": [],
+    "packing_group": "III",
+    "ems_fire": "F-E",
+    "ems_spillage": "S-E",
+    "mfag": "127",
+    "stowage_segregation": "Category A",
+    "special_provisions": [],
+    "description": "乙醯甲基甲醇（3-羥基-2-丁酮），易燃液體，食品香料及化工中間體，具奶油香氣",
+    "flashpoint": "34°C",
+    "boiling_point": "148°C",
+    "emergency_action": {
+      "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻",
+      "spillage": "消除火源，通風，使用沙土吸收，防止進入下水道",
+      "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗，就醫"
+    }
+  },
+  "UN2920": {
+    "proper_shipping_name": "CORROSIVE LIQUID, FLAMMABLE, N.O.S.",
+    "class": "8",
+    "subsidiary_risk": ["3"],
+    "packing_group": "I",
+    "ems_fire": "F-E",
+    "ems_spillage": "S-B",
+    "mfag": "132",
+    "stowage_segregation": "Category E",
+    "special_provisions": ["274"],
+    "description": "腐蝕性易燃液體（未另列名），雙重危險，依實際成分而異，腐蝕性為主要危害",
+    "flashpoint": "< 60°C",
+    "boiling_point": "N/A",
+    "emergency_action": {
+      "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，穿戴耐酸/鹼防護裝備",
+      "spillage": "穿戴全套防護裝備，依酸鹼性中和，防止進入水道，通報相關機關",
+      "first_aid": "皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，立即就醫"
+    }
+  },
+  "UN2035": {
+    "proper_shipping_name": "1,1,1-TRIFLUOROETHANE (HFC-143a)",
+    "class": "2.1",
+    "subsidiary_risk": [],
+    "packing_group": "N/A",
+    "ems_fire": "F-D",
+    "ems_spillage": "S-U",
+    "mfag": "115",
+    "stowage_segregation": "Category E",
+    "special_provisions": ["23"],
+    "description": "1,1,1-三氟乙烷（HFC-143a），易燃液化氣體，冷媒混合物成分（如 R-404A），蒸氣比空氣重",
+    "flashpoint": "N/A",
+    "boiling_point": "-47.6°C",
+    "emergency_action": {
+      "fire": "若安全可關閉氣源，使用水霧冷卻容器，乾粉滅火，禁止使用 CO₂",
+      "spillage": "消除所有火源，疏散區域，穿戴 SCBA，使用水霧稀釋蒸氣，防止進入低窪處",
+      "first_aid": "移至新鮮空氣，凍傷以溫水復溫，若窒息進行人工呼吸，立即就醫"
+    }
+  },
+  "UN2820": {
+  "proper_shipping_name": "BUTYRIC ACID",
+  "class": "8",
+  "subsidiary_risk": ["3"],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "153",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "丁酸（酪酸），腐蝕性且輕微易燃液體，具極強烈腐臭氣味，食品香料及化工原料，對皮膚及眼睛具腐蝕性",
+  "flashpoint": "72°C",
+  "boiling_point": "164°C",
+  "emergency_action": {
+    "fire": "使用水霧、乾粉或 CO₂，禁止使用直射水柱，穿戴耐酸防護裝備，注意刺激性蒸氣",
+    "spillage": "穿戴防護裝備，以碳酸鈉中和，大量清水沖洗，防止進入水道，通風以散去惡臭蒸氣",
+    "first_aid": "皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若吸入蒸氣移至新鮮空氣，立即就醫"
+  }
+},"UN1378": {
+  "proper_shipping_name": "METAL CATALYST, WETTED with a visible excess of liquid",
+  "class": "4.2",
+  "subsidiary_risk": [],
+  "packing_group": "II",
+  "ems_fire": "F-G",
+  "ems_spillage": "S-J",
+  "mfag": "135",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["61"],
+  "description": "濕潤金屬催化劑（含可見過量液體），自燃固體，乾燥後接觸空氣即自燃，氫化反應工業常用（如鎳、鈀、鉑催化劑），必須保持濕潤狀態，禁止乾燥",
+  "flashpoint": "N/A（自燃）",
+  "boiling_point": "N/A",
+  "emergency_action": {
+    "fire": "使用大量水霧或沙土，禁止使用 CO₂ 或乾粉，保持催化劑濕潤，穿戴全套防護裝備，注意復燃危險",
+    "spillage": "立即以水覆蓋保持濕潤，禁止使其乾燥，穿戴全套防護裝備，隔離區域，防止進入下水道",
+    "first_aid": "移至新鮮空氣，皮膚燒傷以大量清水沖洗，眼睛以清水沖洗20分鐘，立即就醫"
+  }
+},
+"UN1193": {
+  "proper_shipping_name": "ETHYL METHYL KETONE (METHYL ETHYL KETONE)",
+  "class": "3",
+  "subsidiary_risk": [],
+  "packing_group": "II",
+  "ems_fire": "F-E",
+  "ems_spillage": "S-E",
+  "mfag": "127",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "甲乙酮（MEK，丁酮），易燃液體，工業溶劑，蒸氣比空氣重，廣泛用於塗料、黏著劑及印刷油墨製造",
+  "flashpoint": "-9°C",
+  "boiling_point": "80°C",
+  "emergency_action": {
+    "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻周圍容器",
+    "spillage": "消除所有火源，通風，使用沙土或惰性吸附材料收集，防止進入下水道及低窪處",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，高濃度吸入可能造成頭暈，立即就醫"
+  }
+},
+"UN1673": {
+  "proper_shipping_name": "PHENYLENEDIAMINES (o-, m-, p-)",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "151",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["223"],
+  "description": "苯二胺（鄰、間、對位異構體），毒性固體，可經皮膚吸收，具致敏性，染料及環氧樹脂固化劑原料，長期接觸可能引發過敏性皮膚炎",
+  "flashpoint": "156°C",
+  "boiling_point": "267°C（對位）",
+  "emergency_action": {
+    "fire": "使用水霧、乾粉或 CO₂，穿戴全套防護裝備，禁止使用直射水柱，注意燃燒產生含氮有毒煙霧",
+    "spillage": "穿戴全套防護裝備（含手套），隔離區域，使用沙土或惰性材料收集，防止粉塵飛揚，防止進入水道",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水及肥皂沖洗20分鐘，眼睛以清水沖洗20分鐘，立即就醫（可經皮膚吸收，具致敏性）"
+  }
+},
+"UN2245": {
+  "proper_shipping_name": "CYCLOPENTANONE",
+  "class": "3",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-E",
+  "ems_spillage": "S-E",
+  "mfag": "127",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "環戊酮，易燃液體，有機合成中間體及工業溶劑，具薄荷樣氣味，蒸氣比空氣重",
+  "flashpoint": "26°C",
+  "boiling_point": "131°C",
+  "emergency_action": {
+    "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻周圍容器",
+    "spillage": "消除所有火源，通風，使用沙土或惰性吸附材料收集，防止進入下水道及低窪處",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，就醫"
+  }
+},
+"UN1378": {
+  "proper_shipping_name": "METAL CATALYST, WETTED with a visible excess of liquid",
+  "class": "4.2",
+  "subsidiary_risk": [],
+  "packing_group": "II",
+  "ems_fire": "F-G",
+  "ems_spillage": "S-J",
+  "mfag": "135",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["61"],
+  "description": "濕潤金屬催化劑（含可見過量液體），自燃固體，乾燥後接觸空氣即自燃，氫化反應工業常用（如鎳、鈀、鉑催化劑），必須保持濕潤狀態，禁止乾燥",
+  "flashpoint": "N/A（自燃）",
+  "boiling_point": "N/A",
+  "emergency_action": {
+    "fire": "使用大量水霧或沙土，禁止使用 CO₂ 或乾粉，保持催化劑濕潤，穿戴全套防護裝備，注意復燃危險",
+    "spillage": "立即以水覆蓋保持濕潤，禁止使其乾燥，穿戴全套防護裝備，隔離區域，防止進入下水道",
+    "first_aid": "移至新鮮空氣，皮膚燒傷以大量清水沖洗，眼睛以清水沖洗20分鐘，立即就醫"
+  }
+},
+"UN1690": {
+  "proper_shipping_name": "SODIUM FLUORIDE",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "154",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["223"],
+  "description": "氟化鈉，毒性固體，溶於水生成氟離子，飲水加氟及鋁冶煉工業用途，誤食少量即可致命，對骨骼及牙齒具累積毒性",
+  "flashpoint": "N/A",
+  "boiling_point": "1704°C",
+  "emergency_action": {
+    "fire": "使用水霧或 CO₂，穿戴全套防護裝備，禁止使用直射水柱，防止廢水污染環境",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡），收集散落物，大量清水沖洗，防止進入水道及土壤，通報相關機關",
+    "first_aid": "皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食立即就醫（氟中毒解毒劑：葡萄糖酸鈣），緊急送醫"
+  }
+},
+"UN2717": {
+  "proper_shipping_name": "CAMPHOR, synthetic",
+  "class": "4.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-G",
+  "mfag": "133",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "合成樟腦，易燃固體，具強烈特殊氣味，醫藥、香料及塑膠增塑劑原料，蒸氣比空氣重，粉塵或蒸氣與空氣混合可形成爆炸性混合物",
+  "flashpoint": "64°C",
+  "boiling_point": "204°C",
+  "emergency_action": {
+    "fire": "使用水霧、乾粉或 CO₂，禁止使用直射水柱，注意樟腦燃燒產生刺激性煙霧，穿戴防護裝備",
+    "spillage": "消除所有火源，通風，收集散落固體，防止粉塵飛揚，防止進入下水道，避免吸入蒸氣",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，若誤食立即就醫（具中樞神經毒性）"
+  }
+},
+"UN2857": {
+  "proper_shipping_name": "REFRIGERATING MACHINES containing non-flammable, non-toxic gases or ammonia solutions (UN 2672)",
+  "class": "2.2",
+  "subsidiary_risk": [],
+  "packing_group": "N/A",
+  "ems_fire": "F-C",
+  "ems_spillage": "S-V",
+  "mfag": "120",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["119", "295"],
+  "description": "含不易燃無毒氣體或氨溶液之冷凍機組，非易燃非毒性壓縮氣體，包含冷氣機、冷凍設備等整機運輸，內含冷媒（如 R-134a、R-410A）或氨溶液",
+  "flashpoint": "N/A",
+  "boiling_point": "N/A",
+  "emergency_action": {
+    "fire": "使用水霧冷卻容器，禁止使用直射水柱，注意高溫下壓力容器可能爆裂（BLEVE），疏散周圍人員",
+    "spillage": "通風，若含氨溶液穿戴 SCBA，使用水霧稀釋氨氣，防止進入下水道，隔離洩漏區域",
+    "first_aid": "移至新鮮空氣，若接觸氨氣以大量清水沖洗皮膚及眼睛20分鐘，呼吸困難立即就醫"
+  }
+},
+"UN2922": {
+  "proper_shipping_name": "CORROSIVE LIQUID, TOXIC, N.O.S.",
+  "class": "8",
+  "subsidiary_risk": ["6.1"],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "154",
+  "stowage_segregation": "Category B",
+  "special_provisions": ["274", "223", "274"],
+  "description": "腐蝕性兼毒性液體（未另列名），雙重危害：腐蝕性破壞皮膚組織，同時具全身性毒性，需依實際物質填寫技術名稱（Technical Name）",
+  "flashpoint": "依實際物質而定",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，禁止使用直射水柱，防止廢水污染環境",
+    "spillage": "穿戴全套防護裝備（耐酸鹼手套、護目鏡、面罩），隔離洩漏區域，使用惰性吸附材料收集，防止進入下水道及水源",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食禁止催吐，立即就醫"
+  }
+},
+
+"UN3272": {
+  "proper_shipping_name": "ESTERS, N.O.S.",
+  "class": "3",
+  "subsidiary_risk": [],
+  "packing_group": "II / III",
+  "ems_fire": "F-E",
+  "ems_spillage": "S-E",
+  "mfag": "127",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274"],
+  "description": "酯類（未另列名），易燃液體，廣泛用於溶劑、香料及塑化劑，蒸氣比空氣重，易積聚於低窪處，需依實際物質填寫技術名稱（Technical Name）",
+  "flashpoint": "依實際物質而定（PG II：< 23°C；PG III：23–60°C）",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻周圍容器，注意蒸氣積聚",
+    "spillage": "消除所有火源，通風，使用沙土或惰性吸附材料收集，防止進入下水道及低窪處",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，就醫"
+  }
+},
+
+"UN3288": {
+  "proper_shipping_name": "TOXIC SOLID, INORGANIC, N.O.S.",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "151",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274", "223"],
+  "description": "無機毒性固體（未另列名），涵蓋各類無機毒性固體物質，需依實際物質填寫技術名稱（Technical Name），危害程度依 PG 等級差異顯著",
+  "flashpoint": "N/A",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，防止廢水污染環境及水源",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡），防止粉塵飛揚，收集散落物，防止進入水道及土壤",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食立即就醫"
+  }
+},
+
+"UN3065": {
+  "proper_shipping_name": "ALCOHOLIC BEVERAGES",
+  "class": "3",
+  "subsidiary_risk": [],
+  "packing_group": "II / III",
+  "ems_fire": "F-E",
+  "ems_spillage": "S-E",
+  "mfag": "127",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["144"],
+  "description": "酒精飲料，易燃液體，乙醇含量超過 24% vol 者須申報危險品，PG II（乙醇 > 70%）或 PG III（24–70%），一般商業酒類海運常見貨物",
+  "flashpoint": "PG II：< 23°C（高濃度烈酒）；PG III：23–60°C（一般酒類）",
+  "boiling_point": "約 78°C（乙醇）",
+  "emergency_action": {
+    "fire": "使用抗醇泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻周圍容器",
+    "spillage": "消除所有火源，通風，使用沙土或惰性吸附材料收集，防止進入下水道",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，大量誤食就醫"
+  }
+},
+"UN2811": {
+  "proper_shipping_name": "TOXIC SOLID, ORGANIC, N.O.S.",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "151",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274", "223"],
+  "description": "有機毒性固體（未另列名），涵蓋各類有機毒性固體，需填寫技術名稱，危害程度依 PG 等級差異顯著，可能具致癌性、致敏性或神經毒性",
+  "flashpoint": "N/A",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，防止廢水污染環境及水源，注意燃燒產生有毒煙霧",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡），防止粉塵飛揚，收集散落物，防止進入水道及土壤",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食立即就醫"
+  }
+},
+
+"UN2234": {
+  "proper_shipping_name": "CHLOROBENZOTRIFLUORIDES",
+  "class": "3",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-E",
+  "ems_spillage": "S-E",
+  "mfag": "127",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "氯苯三氟化物，易燃液體，農藥及染料中間體，蒸氣比空氣重，燃燒產生含氟及含氯有毒煙霧，對水生環境有害",
+  "flashpoint": "54°C",
+  "boiling_point": "137–138°C",
+  "emergency_action": {
+    "fire": "使用泡沫、乾粉或 CO₂，禁止使用直射水柱，穿戴全套防護裝備，注意燃燒產生含氟氯有毒煙霧",
+    "spillage": "消除所有火源，通風，穿戴防護裝備，使用沙土或惰性吸附材料收集，防止進入下水道及水源",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗20分鐘，眼睛以清水沖洗20分鐘，就醫"
+  }
+},
+
+"UN1956": {
+  "proper_shipping_name": "COMPRESSED GAS, N.O.S.",
+  "class": "2.2",
+  "subsidiary_risk": [],
+  "packing_group": "N/A",
+  "ems_fire": "F-C",
+  "ems_spillage": "S-V",
+  "mfag": "120",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274"],
+  "description": "壓縮氣體（未另列名），非易燃非毒性壓縮氣體，需填寫技術名稱，高壓容器受熱有 BLEVE 風險，窒息危害為主要危害",
+  "flashpoint": "N/A",
+  "boiling_point": "N/A",
+  "emergency_action": {
+    "fire": "使用水霧持續冷卻容器外壁，禁止使用直射水柱，疏散周圍人員，注意 BLEVE 風險",
+    "spillage": "通風，隔離洩漏區域，禁止人員進入高濃度洩漏區（窒息危險），確認洩漏源後通報相關機關",
+    "first_aid": "移至新鮮空氣，若呼吸停止進行人工呼吸，立即就醫"
+  }
+},
+
+"UN1564": {
+  "proper_shipping_name": "BARIUM COMPOUNDS, N.O.S.",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "154",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274", "223"],
+  "description": "鋇化合物（未另列名），毒性固體，可溶性鋇鹽具強烈毒性，影響心肌及神經系統，不溶性硫酸鋇毒性極低（醫療顯影劑），需填寫技術名稱",
+  "flashpoint": "N/A",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，防止廢水污染水源",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡），防止粉塵飛揚，收集散落物，防止進入水道",
+    "first_aid": "皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食立即就醫（解毒劑：硫酸鈉，可將可溶性鋇鹽轉為不溶性硫酸鋇）"
+  }
+},
+
+"UN1444": {
+  "proper_shipping_name": "AMMONIUM PERSULPHATE",
+  "class": "5.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-H",
+  "ems_spillage": "S-Q",
+  "mfag": "140",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "過硫酸銨，氧化性固體，強氧化劑，電路板蝕刻、漂白及聚合反應引發劑，受熱分解釋放氧氣加速燃燒，與可燃物接觸可能引發火災，具致敏性",
+  "flashpoint": "N/A（氧化劑）",
+  "boiling_point": "分解溫度約 120°C",
+  "emergency_action": {
+    "fire": "使用大量水霧，禁止使用乾粉或 CO₂，隔離可燃物，穿戴全套防護裝備，注意分解釋放氧氣加速燃燒",
+    "spillage": "穿戴全套防護裝備，隔離區域，使用大量水沖洗，防止進入下水道，遠離可燃物及熱源",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，就醫（具致敏性）"
+  }
+},
+
+"UN1790": {
+  "proper_shipping_name": "HYDROFLUORIC ACID with more than 60% strength / not more than 60% strength",
+  "class": "8",
+  "subsidiary_risk": ["6.1"],
+  "packing_group": "I（>60%）/ II（≤60%）",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "154",
+  "stowage_segregation": "Category B",
+  "special_provisions": ["B3"],
+  "description": "氫氟酸，腐蝕性兼毒性液體，極度危險，氟離子可穿透皮膚深層組織造成骨骼損傷，低濃度接觸初期無痛感但數小時後劇痛，少量皮膚接觸即可致命，為已知最危險的實驗室化學品之一",
+  "flashpoint": "N/A",
+  "boiling_point": "19.5°C（無水）/ 112°C（38.2%共沸）",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧，禁止使用直射水柱，防止廢水污染環境",
+    "spillage": "穿戴全套防護裝備（耐氫氟酸手套、面罩），使用石灰或碳酸鈣中和，禁止使用沙土吸附，防止進入下水道",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘後立即塗抹葡萄糖酸鈣凝膠，眼睛以清水沖洗20分鐘，緊急送醫（靜脈注射葡萄糖酸鈣為關鍵急救措施）"
+  }
+},
+
+"UN2923": {
+  "proper_shipping_name": "CORROSIVE SOLID, TOXIC, N.O.S.",
+  "class": "8",
+  "subsidiary_risk": ["6.1"],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "154",
+  "stowage_segregation": "Category B",
+  "special_provisions": ["274", "223"],
+  "description": "腐蝕性兼毒性固體（未另列名），雙重危害固體，腐蝕性破壞皮膚及黏膜組織，同時具全身性毒性，需填寫技術名稱，PG 等級決定危害強度",
+  "flashpoint": "N/A",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，防止廢水污染環境，注意燃燒產生有毒腐蝕性煙霧",
+    "spillage": "穿戴全套防護裝備（耐酸鹼手套、護目鏡、面罩），防止粉塵飛揚，收集散落物，防止進入水道",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食禁止催吐，立即就醫"
+  }
+},
+
+"UN2930": {
+  "proper_shipping_name": "TOXIC SOLID, ORGANIC, N.O.S.",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "151",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274", "223"],
+  "description": "有機毒性固體（未另列名），與 UN2811 同類別，需填寫技術名稱，涵蓋農藥、染料中間體等有機毒性固體，危害程度依 PG 等級及實際物質而定",
+  "flashpoint": "N/A",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，防止廢水污染環境，注意燃燒產生有毒煙霧",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡），防止粉塵飛揚，收集散落物，防止進入水道及土壤",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食立即就醫"
+  }
+},
+
+"UN3145": {
+  "proper_shipping_name": "ALKYLPHENOLS, LIQUID, N.O.S. (including C2-C12 homologues)",
+  "class": "8",
+  "subsidiary_risk": ["6.1"],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "153",
+  "stowage_segregation": "Category B",
+  "special_provisions": ["274"],
+  "description": "烷基苯酚液體（未另列名，含 C2–C12 同系物），腐蝕性兼毒性液體，工業界面活性劑及樹脂原料，對水生環境毒性極強（壬基苯酚為環境荷爾蒙），可經皮膚吸收",
+  "flashpoint": "依實際物質而定",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或泡沫，禁止使用直射水柱，防止廢水污染水源（對水生環境毒性極強）",
+    "spillage": "穿戴全套防護裝備（耐酸鹼手套、護目鏡），使用惰性吸附材料收集，嚴防進入下水道及水源，通報環保機關",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水及肥皂沖洗20分鐘，眼睛以清水沖洗20分鐘，立即就醫（可經皮膚吸收）"
+  }
+},
+"UN2556": {
+  "proper_shipping_name": "NITROCELLULOSE WITH ALCOHOL with not less than 25% alcohol, and with not more than 12.6% nitrogen, by dry mass",
+  "class": "4.1",
+  "subsidiary_risk": [],
+  "packing_group": "II",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-G",
+  "mfag": "133",
+  "stowage_segregation": "Category E",
+  "special_provisions": ["39", "178"],
+  "description": "含酒精硝化纖維素（酒精含量≥25%，氮含量≤12.6%），易燃固體，油漆、清漆及印刷油墨原料，以酒精濕潤降低自燃風險，若乾燥則危險性大幅上升，禁止使其乾燥",
+  "flashpoint": "依酒精含量而定（通常 < 23°C）",
+  "boiling_point": "N/A",
+  "emergency_action": {
+    "fire": "使用大量水霧，禁止使用乾粉或 CO₂，保持物質濕潤，穿戴全套防護裝備，注意復燃危險",
+    "spillage": "立即以水覆蓋保持濕潤，消除所有火源，穿戴防護裝備，防止乾燥，收集時保持濕潤狀態",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，就醫"
+  }
+},
+
+"UN2491": {
+  "proper_shipping_name": "ETHANOLAMINE or ETHANOLAMINE SOLUTIONS",
+  "class": "8",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "153",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "乙醇胺或乙醇胺溶液，腐蝕性液體，天然氣脫硫、化妝品及洗滌劑原料，具氨臭味，對皮膚及眼睛有強烈腐蝕性，可經皮膚吸收，對水生環境有害",
+  "flashpoint": "85°C",
+  "boiling_point": "171°C",
+  "emergency_action": {
+    "fire": "使用水霧、乾粉或 CO₂，禁止使用直射水柱，穿戴全套防護裝備，防止廢水污染水源",
+    "spillage": "穿戴防護裝備（耐鹼手套、護目鏡），使用沙土或惰性吸附材料收集，防止進入下水道，大量清水沖洗污染區域",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，就醫"
+  }
+},
+
+"UN1328": {
+  "proper_shipping_name": "HEXAMETHYLENETETRAMINE",
+  "class": "4.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-G",
+  "mfag": "133",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "六亞甲基四胺（烏洛托品），易燃固體，醫藥（尿路抗菌劑）、樹脂固化劑及固體燃料（固體酒精）原料，燃燒產生氮氧化物，粉塵可形成爆炸性混合物",
+  "flashpoint": "250°C（固體，但粉塵危險性高）",
+  "boiling_point": "昇華約 280°C",
+  "emergency_action": {
+    "fire": "使用水霧、乾粉或 CO₂，防止粉塵飛揚，穿戴全套防護裝備，注意燃燒產生氮氧化物",
+    "spillage": "消除所有火源，防止粉塵飛揚，使用濕式清掃，收集散落物，防止進入下水道",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，若誤食就醫"
+  }
+},
+
+"UN2213": {
+  "proper_shipping_name": "PARAFORMALDEHYDE",
+  "class": "4.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-G",
+  "mfag": "133",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "多聚甲醛，易燃固體，甲醛聚合物，樹脂、農藥及消毒劑原料，受熱或燃燒釋放甲醛氣體（已知致癌物，IARC Group 1），具強烈刺激性氣味，對眼睛及呼吸道有強烈刺激性",
+  "flashpoint": "70°C",
+  "boiling_point": "分解溫度約 120–170°C（釋放甲醛）",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，禁止使用直射水柱，注意燃燒釋放甲醛致癌氣體，確保下風向人員疏散",
+    "spillage": "穿戴全套防護裝備含 SCBA，防止粉塵飛揚，使用濕式清掃，收集散落物密封，防止進入下水道",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，吸入甲醛蒸氣立即就醫"
+  }
+},
+
+"UN2531": {
+  "proper_shipping_name": "METHACRYLIC ACID, STABILIZED",
+  "class": "8",
+  "subsidiary_risk": ["3"],
+  "packing_group": "II",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "153",
+  "stowage_segregation": "Category E",
+  "special_provisions": ["386"],
+  "description": "甲基丙烯酸（穩定化），腐蝕性兼易燃液體，壓克力樹脂及塗料單體，含阻聚劑防止自聚，若阻聚劑耗盡可發生劇烈放熱聚合反應，對皮膚及眼睛有強烈腐蝕性，具刺激性氣味",
+  "flashpoint": "77°C",
+  "boiling_point": "161°C",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或泡沫，禁止使用直射水柱，注意自聚放熱風險，持續冷卻容器",
+    "spillage": "穿戴全套防護裝備（耐酸手套、護目鏡），消除所有火源，使用惰性吸附材料收集，防止進入下水道，避免接觸氧化劑",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，就醫"
+  }
+},
+"UN2922": {
+  "proper_shipping_name": "CORROSIVE LIQUID, TOXIC, N.O.S.",
+  "class": "8",
+  "subsidiary_risk": ["6.1"],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "154",
+  "stowage_segregation": "Category B",
+  "special_provisions": ["274", "223"],
+  "description": "腐蝕性兼毒性液體（未另列名），雙重危害：腐蝕性破壞皮膚及黏膜組織，同時具全身性毒性，需依實際物質填寫技術名稱（Technical Name），PG 等級決定危害強度",
+  "flashpoint": "依實際物質而定",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，禁止使用直射水柱，防止廢水污染環境",
+    "spillage": "穿戴全套防護裝備（耐酸鹼手套、護目鏡、面罩），隔離洩漏區域，使用惰性吸附材料收集，防止進入下水道及水源",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食禁止催吐，立即就醫"
+  }
+},
+
+"UN1197": {
+  "proper_shipping_name": "EXTRACTS, FLAVOURING, LIQUID",
+  "class": "3",
+  "subsidiary_risk": [],
+  "packing_group": "II / III",
+  "ems_fire": "F-E",
+  "ems_spillage": "S-E",
+  "mfag": "127",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["144"],
+  "description": "液態香料萃取物，易燃液體，食品、飲料及香水工業原料，通常以乙醇為溶劑，PG II（閃點 < 23°C）或 PG III（閃點 23–60°C），蒸氣比空氣重，易積聚於低窪處",
+  "flashpoint": "PG II：< 23°C；PG III：23–60°C",
+  "boiling_point": "依實際物質而定（通常接近乙醇沸點 78°C）",
+  "emergency_action": {
+    "fire": "使用抗醇泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻周圍容器，注意蒸氣積聚於低窪處",
+    "spillage": "消除所有火源，通風，使用沙土或惰性吸附材料收集，防止進入下水道及低窪處",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，大量誤食就醫"
+  }
+},
+
+"UN1564": {
+  "proper_shipping_name": "BARIUM COMPOUNDS, N.O.S.",
+  "class": "6.1",
+  "subsidiary_risk": [],
+  "packing_group": "II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-A",
+  "mfag": "154",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274", "223"],
+  "description": "鋇化合物（未另列名），毒性固體，可溶性鋇鹽具強烈毒性，影響心肌及神經系統，不溶性硫酸鋇毒性極低，需填寫技術名稱以區分危害程度",
+  "flashpoint": "N/A",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，防止廢水污染水源",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡），防止粉塵飛揚，收集散落物，防止進入水道",
+    "first_aid": "皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食立即就醫（解毒劑：硫酸鈉，可將可溶性鋇鹽轉為不溶性硫酸鋇）"
+  }
+},
+
+"UN1505": {
+  "proper_shipping_name": "SODIUM PERSULPHATE",
+  "class": "5.1",
+  "subsidiary_risk": [],
+  "packing_group": "III",
+  "ems_fire": "F-H",
+  "ems_spillage": "S-Q",
+  "mfag": "140",
+  "stowage_segregation": "Category A",
+  "special_provisions": [],
+  "description": "過硫酸鈉，氧化性固體，強氧化劑，電路板蝕刻、漂白及聚合反應引發劑，與過硫酸銨（UN1444）同類用途，受熱分解釋放氧氣加速燃燒，具致敏性，與可燃物接觸可能引發火災",
+  "flashpoint": "N/A（氧化劑）",
+  "boiling_point": "分解溫度約 180°C",
+  "emergency_action": {
+    "fire": "使用大量水霧，禁止使用乾粉或 CO₂，隔離可燃物，穿戴全套防護裝備，注意分解釋放氧氣加速燃燒",
+    "spillage": "穿戴全套防護裝備，隔離區域，使用大量水沖洗，防止進入下水道，遠離可燃物及熱源",
+    "first_aid": "移至新鮮空氣，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，就醫（具致敏性）"
+  }
+},
+
+"UN2735": {
+  "proper_shipping_name": "AMINES, LIQUID, CORROSIVE, N.O.S. or POLYAMINES, LIQUID, CORROSIVE, N.O.S.",
+  "class": "8",
+  "subsidiary_risk": [],
+  "packing_group": "I / II / III",
+  "ems_fire": "F-A",
+  "ems_spillage": "S-B",
+  "mfag": "153",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["274", "223"],
+  "description": "腐蝕性液態胺類或聚胺類（未另列名），腐蝕性液體，環氧樹脂固化劑、農藥及染料中間體，具強烈氨臭味，對皮膚及眼睛有強烈腐蝕性，可經皮膚吸收，需填寫技術名稱",
+  "flashpoint": "依實際物質而定",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧或 CO₂，禁止使用直射水柱，防止廢水污染環境",
+    "spillage": "穿戴全套防護裝備（耐鹼手套、護目鏡、面罩），隔離洩漏區域，使用惰性吸附材料收集，防止進入下水道，大量清水沖洗污染區域",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水沖洗20分鐘，眼睛以清水沖洗20分鐘，吸入蒸氣移至新鮮空氣，立即就醫"
+  }
+},
+"UN2991": {
+  "proper_shipping_name": "CARBAMATE PESTICIDE, LIQUID, TOXIC, FLAMMABLE",
+  "class": "6.1",
+  "subsidiary_risk": ["3"],
+  "packing_group": "II / III",
+  "ems_fire": "F-D",
+  "ems_spillage": "S-D",
+  "mfag": "131",
+  "stowage_segregation": "Category B",
+  "special_provisions": ["61"],
+  "description": "胺基甲酸酯類農藥液體（毒性兼易燃），乙醯膽鹼酯酶抑制劑，廣泛用於殺蟲劑，代表物質包括克百威（Carbofuran）、滅多威（Methomyl）等，毒性強烈，可經皮膚、吸入及誤食途徑中毒，閃點 ≥ 23°C（PG II）或依實際物質而定（PG III）",
+  "flashpoint": "PG II：≥ 23°C；PG III：依實際物質而定",
+  "boiling_point": "依實際物質而定",
+  "emergency_action": {
+    "fire": "穿戴全套防護裝備含 SCBA，使用水霧、泡沫或 CO₂，禁止使用直射水柱，防止廢水污染水源及土壤，注意燃燒產生含氮有毒煙霧",
+    "spillage": "穿戴全套防護裝備（含手套、護目鏡、面罩），隔離洩漏區域，使用惰性吸附材料收集，嚴防進入下水道及水源，通報環保機關",
+    "first_aid": "立即脫去污染衣物，皮膚以大量清水及肥皂沖洗20分鐘，眼睛以清水沖洗20分鐘，若誤食禁止催吐，出現中毒症狀（流涎、縮瞳、肌肉顫抖）立即就醫，解毒劑為阿托品（Atropine）"
+  }
+},
+
+"UN1197": {
+  "proper_shipping_name": "EXTRACTS, FLAVOURING, LIQUID",
+  "class": "3",
+  "subsidiary_risk": [],
+  "packing_group": "II / III",
+  "ems_fire": "F-E",
+  "ems_spillage": "S-E",
+  "mfag": "127",
+  "stowage_segregation": "Category A",
+  "special_provisions": ["144"],
+  "description": "液態香料萃取物，易燃液體，食品、飲料及香水工業原料，通常以乙醇為溶劑，PG II（閃點 < 23°C）或 PG III（閃點 23–60°C），蒸氣比空氣重，易積聚於低窪處",
+  "flashpoint": "PG II：< 23°C；PG III：23–60°C",
+  "boiling_point": "依實際物質而定（通常接近乙醇沸點 78°C）",
+  "emergency_action": {
+    "fire": "使用抗醇泡沫、乾粉或 CO₂，禁止使用直射水柱，水霧可用於冷卻周圍容器，注意蒸氣積聚於低窪處",
+    "spillage": "消除所有火源，通風，使用沙土或惰性吸附材料收集，防止進入下水道及低窪處",
+    "first_aid": "移至新鮮空氣，皮膚以清水沖洗，眼睛以清水沖洗15分鐘，大量誤食就醫"
   }
 }
+
+
+
+}
+
 
 
 
