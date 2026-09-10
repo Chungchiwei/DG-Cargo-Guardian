@@ -681,16 +681,16 @@ with st.sidebar:
     # 先前使用 https://img.icons8.com/... 的外部圖示，船上無網路時會顯示破圖）
     st.markdown(
         '<div class="whl-badge-wrap">'
-        '<div class="whl-badge">WHL</div>'
+        '<div class="whl-badge">DCMS</div>'
         '<div class="whl-wordmark">'
         '<div class="line1">Wan Hai Lines</div>'
-        '<div class="line2">DG Cargo Guardian</div>'
+        '<div class="line2">DG Cargo Management System</div>'
         '</div></div>',
         unsafe_allow_html=True
     )
     st.markdown(
         "<div style='color:#94A3B8; font-size:0.85rem; margin-top:-0.4rem;'>"
-        "海運危險品應急處置輔助系統</div>",
+        "WHL 船舶危險品管理系統</div>",
         unsafe_allow_html=True
     )
     st.divider()
@@ -699,9 +699,9 @@ with st.sidebar:
         "📋 功能選單",
         options=[
             "🔍 EMS 快速查詢",
-            "🤖 AI 事故分析",
-            "🔄 積載隔離檢查",
-            "🗺️ DG Bay Plan",
+            "🤖 AI 事故應急處置分析",
+            "🔄 AI 積載隔離檢查",
+            "🗺️ Bay Plan Review",
             "💬 自由問答",
         ],
         label_visibility="collapsed"
@@ -711,11 +711,14 @@ with st.sidebar:
 
     st.markdown("#### 🔖 常用 UN 號碼")
     quick_uns = {
-        "UN1203 — 汽油":  "1203",
-        "UN1017 — 氯氣":  "1017",
-        "UN1789 — 鹽酸":  "1789",
-        "UN3480 — 鋰電池":"3480",
-        "UN1072 — 氧氣":  "1072",
+        "UN1203 — 汽油(Class 3)":  "1203",
+        "UN1017 — 氯氣(Class 2.3)":  "1017",
+        "UN1789 — 鹽酸(Class 8)":  "1789",
+        "UN1790 — 氫氟酸(Class 8)":  "1790",
+        "UN3480 — 鋰電池(Class 9)":"3480",
+        "UN1072 — 氧氣(Class 2.2)":  "1072",
+        "UN1263 — 油漆(Class 3)":  "1263",
+        "UN3077 — 環境有害物質(Class 9)":  "3077",
     }
     for label, un in quick_uns.items():
         if st.button(label, use_container_width=True):
@@ -745,7 +748,7 @@ with st.sidebar:
         "⚠️ 本系統為決策輔助工具，僅供參考<br>"
         "實際操作請依船上核准之 IMDG Code、EmS Guide、MFAG 及公司 SMS 程序，"
         "最終決定權屬船長<br>"
-        "Wan Hai Lines © DG Cargo Guardian"
+        "Wan Hai Lines © DG Cargo Management System"
         "</div>",
         unsafe_allow_html=True
     )
@@ -867,9 +870,9 @@ if page == "🔍 EMS 快速查詢":
             if data.get("legacy_emergency_action_available"):
                 st.markdown(
                     '<div class="warning-banner">'
-                    '⚠️ 以下為系統舊版資料，尚未依 IMDG Code 2024 Supplement 核對來源，'
-                    '不是官方逐字條文，僅供快速參考；正式處置仍須以船上核准之 IMDG Code、'
-                    'EmS Guide、MFAG 及公司 SMS 程序，並經船長／大副確認為準'
+                    '⚠️ 以下為資料來源為IMDG Code 2024 Supplement，'
+                    '僅供快速參考；正式處置仍須以船上核准之 IMDG Code、'
+                    'EmS Guide、及公司 SMS 程序，並經船長／大副確認為準'
                     '</div>',
                     unsafe_allow_html=True
                 )
@@ -959,9 +962,9 @@ if page == "🔍 EMS 快速查詢":
 # ══════════════════════════════════════════════════════════════
 # 頁面 2：AI 事故分析
 # ══════════════════════════════════════════════════════════════
-elif page == "🤖 AI 事故分析":
+elif page == "🤖 AI 事故應急處置分析":
 
-    st.markdown('<div class="main-title">🤖 AI 事故分析</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">🤖 AI 事故應急處置分析</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">描述事故情境，AI 根據 IMDG 資料給出應急建議</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="warning-banner">'
@@ -1192,9 +1195,9 @@ elif page == "🤖 AI 事故分析":
 # ══════════════════════════════════════════════════════════════
 # 頁面 3：積載隔離檢查
 # ══════════════════════════════════════════════════════════════
-elif page == "🔄 積載隔離檢查":
+elif page == "🔄 AI 積載隔離檢查":
 
-    st.markdown('<div class="main-title">🔄 積載隔離檢查</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">🔄 AI 積載隔離檢查</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">輸入 UN 號碼與貨櫃位置，檢查是否違反 IMDG 隔離規定</div>', unsafe_allow_html=True)
 
     with st.expander("📖 貨櫃位置說明"):
@@ -1581,9 +1584,9 @@ elif page == "🔄 積載隔離檢查":
 # ══════════════════════════════════════════════════════════════
 # 頁面 4：DG Bay Plan
 # ══════════════════════════════════════════════════════════════
-elif page == "🗺️ DG Bay Plan":
+elif page == "🗺️ Bay Plan Review":
 
-    st.markdown('<div class="main-title">🗺️ DG Bay Plan</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">🗺️ Bay Plan Review</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="sub-title">上傳 DG 艙單，自動產生滅火介質視覺化積載圖</div>',
         unsafe_allow_html=True
@@ -1602,7 +1605,7 @@ elif page == "🗺️ DG Bay Plan":
     # 官方危險標誌底色）。先前依 fire_color 紅/黃/綠上色的邏輯已因
     # fire_classifier fail-closed 而失去意義，已全面改為上述兩種並在此明確
     # 標示「僅供辨識，非風險等級」（規格書 3.5）；下方另保留系統資料狀態圖例。
-    with st.expander("🎨 色標說明", expanded=False):
+    with st.expander("🎨 Ems顏色說明", expanded=False):
         st.markdown("###### 🔥 依 EmS Fire Code 上色（預設；僅供視覺辨識，非滅火介質或風險等級）")
         st.caption(
             "依貨物的 EmS Fire Code（F-A ~ F-J，資料庫已核對來源的代碼本身）分組上色，"
