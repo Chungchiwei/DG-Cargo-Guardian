@@ -6,7 +6,6 @@ import json
 import os
 import re
 from typing import Optional
-from functools import lru_cache
 
 # ── 資料庫路徑 ───────────────────────────────────────────────
 DB_PATH = os.path.join(os.path.dirname(__file__), "imdg_database.json")
@@ -233,171 +232,57 @@ def search_by_keyword(keyword: str, limit: int = 50) -> list:
 
 
 # ══════════════════════════════════════════════════════════════
-# 🔥 EMS 代碼完整對照表
+# 🔥 EMS 代碼 — fail-closed 顯示（規格書 3.1 / docs/INITIAL_SAFETY_AUDIT.md C-3）
 # ══════════════════════════════════════════════════════════════
+#
+# 原本這裡有一份手寫的 EMS_FIRE_CODES / EMS_SPILLAGE_CODES 對照表，內含具體滅火劑、
+# 處置行動與注意事項，但沒有任何文件名稱、版本、章節頁碼、生效日期、公司核准日期與
+# SHA-256，屬於未經核准的安全關鍵判斷，已全面停用並移除內容。
+#
+# 在公司匯入經核准的 2024 EmS Supplement 結構化資料（含上述版本／來源欄位）之前，
+# 本模組僅回傳原始 F-code / S-code 與統一的「未經驗證」提示，不再產生任何滅火介質、
+# PPE、冷卻時間、撤離距離或處置行動等內容。與 fire_classifier.py 的 fail-closed
+# 行為保持一致。
+#
+# 2026-09 更新（見 docs/KNOWN_LIMITATIONS.md §7.12）：本函式僅收到 F-code／S-code
+# 兩個代碼本身，並未收到 UN 號碼，因此**結構上就無法**做到逐物質內容——同一個
+# IMDG EmS 代碼（如 F-A）可能對應到多個完全不同的美國 ERG2024 Guide Number（ERG
+# 與 IMDG 是兩套不同分類系統，不是一對一映射），勉強在這裡填入某個具體 ERG 內容
+# 反而會造成「同代碼不同物質顯示相同內容」的誤導。真正逐物質、已依 UN 號碼對應
+# 正確 ERG2024 Guide 的完整內容，改放在 imdg_database.json 每筆記錄的
+# emergency_action／emergency_action_source 欄位（ems_engine.query_ems() 已回傳，
+# app.py 的「應急處置指引」區塊已顯示），此函式的訊息文字僅更新為指向該區塊。
 
-EMS_FIRE_CODES = {
-    "F-A": {
-        "summary": "一般可燃物火災",
-        "agents":  "水、CO₂、乾粉、泡沫",
-        "notes":   "適用大多數固體可燃物，可直接用水撲滅",
-    },
-    "F-B": {
-        "summary": "爆炸物火災",
-        "agents":  "大量水霧",
-        "notes":   "⛔ 禁止使用 CO₂；火勢無法控制時立即撤離至安全距離",
-    },
-    "F-C": {
-        "summary": "壓縮/液化氣體火災",
-        "agents":  "水霧冷卻容器",
-        "notes":   "優先關閉氣源閥門；容器過熱有爆炸風險",
-    },
-    "F-D": {
-        "summary": "易燃氣體火災",
-        "agents":  "水霧、乾粉",
-        "notes":   "⛔ 禁止使用 CO₂；防止氣體積聚於低窪處",
-    },
-    "F-E": {
-        "summary": "易燃液體火災",
-        "agents":  "泡沫、乾粉、CO₂",
-        "notes":   "⛔ 禁止直射水流（可能擴散火勢）；使用水霧冷卻周圍容器",
-    },
-    "F-F": {
-        "summary": "自燃物質火災",
-        "agents":  "大量水",
-        "notes":   "⛔ 禁止使用 CO₂；保持物質濕潤防止復燃",
-    },
-    "F-G": {
-        "summary": "遇水反應物火災",
-        "agents":  "乾沙、D 類乾粉",
-        "notes":   "⛔ 嚴禁使用水、泡沫、CO₂；接觸水會產生可燃/有毒氣體",
-    },
-    "F-H": {
-        "summary": "氧化劑火災",
-        "agents":  "大量水霧",
-        "notes":   "⛔ 禁止使用 CO₂ 及可燃性滅火劑；氧化劑會助燃",
-    },
-    "F-J": {
-        "summary": "有機過氧化物火災",
-        "agents":  "大量水霧",
-        "notes":   "持續冷卻容器防止爆炸；有自加速分解風險",
-    },
-    "F-S": {
-        "summary": "固體危險品火災",
-        "agents":  "水、乾粉",
-        "notes":   "依物質特性選擇滅火劑，注意燃燒產物毒性",
-    },
-}
-
-EMS_SPILLAGE_CODES = {
-    "S-A": {
-        "summary": "一般固體洩漏",
-        "action":  "掃除收集，放入密封容器",
-        "notes":   "通風，防止粉塵吸入；防止進入排水系統",
-    },
-    "S-B": {
-        "summary": "腐蝕性液體洩漏",
-        "action":  "中和後大量清水沖洗",
-        "notes":   "穿戴耐酸鹼防護；酸鹼中和時注意放熱反應",
-    },
-    "S-C": {
-        "summary": "感染性物質洩漏",
-        "action":  "消毒液覆蓋，隔離現場",
-        "notes":   "立即通報衛生機關；處置人員需穿戴生物防護裝備",
-    },
-    "S-D": {
-        "summary": "毒性液體洩漏",
-        "action":  "吸附材料收集，密封廢棄",
-        "notes":   "穿戴全套化學防護；防止皮膚及吸入暴露",
-    },
-    "S-E": {
-        "summary": "易燃液體洩漏",
-        "action":  "消除所有火源，吸附材料收集",
-        "notes":   "⛔ 禁止使用電動工具；防止蒸氣積聚",
-    },
-    "S-F": {
-        "summary": "環境危害物洩漏",
-        "action":  "圍堵防止擴散，收集廢液",
-        "notes":   "依 MARPOL 規定通報；防止進入海洋",
-    },
-    "S-G": {
-        "summary": "自燃物洩漏",
-        "action":  "保持濕潤或隔絕空氣",
-        "notes":   "⛔ 禁止暴露於空氣中；立即用濕沙覆蓋",
-    },
-    "S-I": {
-        "summary": "鋰電池洩漏/熱失控",
-        "action":  "隔離，大量水冷卻",
-        "notes":   "注意熱失控連鎖反應；通風排除有毒氣體",
-    },
-    "S-P": {
-        "summary": "遇水反應物洩漏",
-        "action":  "乾燥覆蓋，隔絕水分",
-        "notes":   "⛔ 嚴禁使用水；保持乾燥環境",
-    },
-    "S-Q": {
-        "summary": "氧化劑洩漏",
-        "action":  "大量清水稀釋沖洗",
-        "notes":   "⛔ 禁止接觸可燃物；防止氧化反應",
-    },
-    "S-U": {
-        "summary": "有毒/易燃氣體洩漏",
-        "action":  "疏散，水霧稀釋，消除火源",
-        "notes":   "從上風處接近；確認氣體濃度低於爆炸下限後方可進入",
-    },
-    "S-V": {
-        "summary": "冷凍液化氣體洩漏",
-        "action":  "通風，保持距離",
-        "notes":   "注意窒息風險（密閉空間）及低溫凍傷",
-    },
-    "S-W": {
-        "summary": "放射性物質洩漏",
-        "action":  "隔離，通報輻射防護機關",
-        "notes":   "⛔ 禁止未授權人員接近；啟動船上輻射應急程序",
-    },
-    "S-X": {
-        "summary": "腐蝕性固體洩漏",
-        "action":  "乾式清掃，避免揚塵",
-        "notes":   "穿戴耐腐蝕防護；防止粉塵吸入",
-    },
-    "S-Y": {
-        "summary": "爆炸物洩漏",
-        "action":  "禁止接觸，隔離現場",
-        "notes":   "⛔ 禁止任何撞擊、摩擦或加熱；立即通知爆炸物處置專家",
-    },
-    "S-Z": {
-        "summary": "磁性物質洩漏",
-        "action":  "保持與電子設備距離",
-        "notes":   "通知航行設備檢查；可能影響羅盤及導航系統",
-    },
-}
+EMS_NOT_VERIFIED_MESSAGE = "本代碼本身無逐物質內容，詳細應急處置請見下方「應急處置指引」（ERG2024 對照）及船上最新版 EmS Guide。"
 
 
 def get_ems_description(ems_fire: str, ems_spillage: str) -> dict:
     """
-    取得 EMS 代碼的完整中文說明（強化版）。
+    取得 EMS 代碼的 fail-closed 顯示資訊（不含未經核准的具體處置內容）。
 
     Args:
         ems_fire    : 火災 EMS 代碼，例如 "F-E"
         ems_spillage: 洩漏 EMS 代碼，例如 "S-E"
 
     Returns:
-        包含火災與洩漏完整說明的字典
+        僅包含原始代碼與統一提示；不含滅火劑／處置行動等內容——這兩個代碼本身
+        無法對應到特定 UN 號碼的 ERG2024 Guide（見上方模組註解），逐物質內容
+        改由 imdg_database.json 的 emergency_action 欄位提供。
     """
-    fire_info  = EMS_FIRE_CODES.get(ems_fire.upper(), {})
-    spill_info = EMS_SPILLAGE_CODES.get(ems_spillage.upper(), {})
+    fire_code = (ems_fire or "").strip().upper()
+    spill_code = (ems_spillage or "").strip().upper()
 
     return {
-        "fire_code":              ems_fire,
-        "fire_summary":           fire_info.get("summary", "請參閱 IMDG EMS 手冊"),
-        "fire_agents":            fire_info.get("agents",  "請參閱 IMDG EMS 手冊"),
-        "fire_notes":             fire_info.get("notes",   ""),
-        "fire_description":       f"{fire_info.get('summary', '')} — 使用：{fire_info.get('agents', '')}",
-        "spillage_code":          ems_spillage,
-        "spillage_summary":       spill_info.get("summary", "請參閱 IMDG EMS 手冊"),
-        "spillage_action":        spill_info.get("action",  "請參閱 IMDG EMS 手冊"),
-        "spillage_notes":         spill_info.get("notes",   ""),
-        "spillage_description":   f"{spill_info.get('summary', '')} — {spill_info.get('action', '')}",
+        "fire_code":            fire_code,
+        "fire_summary":         EMS_NOT_VERIFIED_MESSAGE if fire_code else "查無資料",
+        "fire_agents":          "",
+        "fire_notes":           "",
+        "fire_description":     f"EmS {fire_code}" if fire_code else "查無資料",
+        "spillage_code":        spill_code,
+        "spillage_summary":     EMS_NOT_VERIFIED_MESSAGE if spill_code else "查無資料",
+        "spillage_action":      "",
+        "spillage_notes":       "",
+        "spillage_description": f"EmS {spill_code}" if spill_code else "查無資料",
     }
 
 
@@ -424,6 +309,10 @@ def _fill_missing_fields(entry: dict) -> dict:
             "spillage":   "",
             "first_aid":  "",
         },
+        # 2026-09 新增（見 docs/KNOWN_LIMITATIONS.md §7.12）：emergency_action
+        # 內容來源標示，防禦性預設值（正常情況下 198 筆資料應皆已補齊，此處僅
+        # 避免缺漏欄位時下游 KeyError）。
+        "emergency_action_source": {},
     }
     for key, default in defaults.items():
         if key not in entry:

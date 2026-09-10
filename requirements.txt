@@ -4,8 +4,7 @@
 
 # Streamlit UI
 streamlit>=1.32.0
-anthropic>=0.25.0
-# LLM API
+# LLM API（anthropic 套件先前未被任何程式碼使用，已移除，見 docs/INITIAL_SAFETY_AUDIT.md H-10）
 openai>=1.30.0
 
 # 環境變數

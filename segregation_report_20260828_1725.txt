@@ -1,0 +1,557 @@
+============================================================
+  DG CARGO GUARDIAN — 積載隔離檢查報告
+  產生時間：2026-08-28 17:25:21
+============================================================
+
+【貨物清單】
+  貨物 1   | UN3077 | ENVIRONMENTALLY HAZARDOUS SUBSTANCE | Class 9    | 位置：Bay03 Row05(左舷第3列) Tier82(甲板上第1層)
+  貨物 2   | UN1203 | MOTOR SPIRIT or GASOLINE or PETROL  | Class 3    | 位置：Bay03 Row04(右舷第2列) Tier82(甲板上第1層)
+  貨物 3   | UN1789 | HYDROCHLORIC ACID                   | Class 8    | 位置：Bay03 Row04(右舷第2列) Tier84(甲板上第2層)
+  貨物 4   | UN3480 | LITHIUM ION BATTERIES (including li | Class 9    | 位置：Bay03 Row05(左舷第3列) Tier84(甲板上第2層)
+
+【檢查結果摘要】共 6 組配對，6 項違規
+
+------------------------------------------------------------
+🚨 [違規]  貨物 1(UN3077 @ 030582)  ×  貨物 2(UN1203 @ 030482)
+距離：約 2.4m（緊鄰）
+
+依 IMDG Code 一般隔離原則與目前公開資料，**Class 3 與 Class 9 之間在 Segregation Table 上通常是「X」（無額外隔離要求）**，僅依各 UN 個別條目是否載有額外 Segregation Codes 而加嚴。[4][9][10]
+
+---
+
+## 1. 隔離要求判定（IMDG Segregation Table 觀點）
+
+### 1.1 依危險類別（Class-based）的一般要求
+
+- **貨物 A：UN3077，Class 9（Miscellaneous / Environmentally hazardous solid）**  
+  多數 Class 9 與其他類別在 Segregation Table 上標示為 **「X」（無特別隔離要求）**，僅在與某些特定類別（如 Class 1 某些子類、5.1 強氧化劑等）有數字 1–4 隔離要求。[5][8][13]  
+  部分 UN3077 條目說明：  
+  - Segregation groups：通常為 **none（未分配至任何 segregation group）**。[4][10]  
+  - Segregation provisions：一般為 **none（無額外隔離規定）**。[10]
+
+- **貨物 B：UN1203，Class 3（Motor spirit / Gasoline / Petrol，Flammable liquid）**  
+  公開摘要顯示：  
+  - Stowage category：E（你已提供）  
+  - Segregation groups：**none**。[9]  
+  - Segregation provisions：**none**（沒有對其他類別，例如 Class 9，指定「away from」、「separated from」等額外要求）。[9]
+
+綜合上述，對 **Class 3 vs Class 9** 來看：  
+- 在一般 Segregation Table 中，兩者交叉格多為 **「X」**，意味著：  
+  - 不要求 **「Away from（至少 3 m）」**、  
+  - 亦不要求 **「Separated from（不同艙／約 6 m）」**、  
+  - 也不要求 **「Separation by complete compartment/hold」** 或 **「Separated longitudinally」**。[1][2][8]
+
+### 1.2 依 UN 個別條目（Entry-based）檢核
+
+- UN3077：現有公開摘要中明示「There are no special requirements for segregation」以及「Segregation provisions：none」。[10]  
+- UN1203：公開 IMDG 摘要同樣顯示「Segregation provisions：none」，未對 Class 9 標示 SG7 / SG8 等須「away from」其他類別的代碼。[9][3]
+
+**結論（隔離要求）：**  
+- 就 IMDG Code 一般規範而言，**UN3077（Class 9）與 UN1203（Class 3）之間不要求特別隔離距離**。  
+- 即：兩者可在同一艙、同一 Bay 緊鄰積載，**不構成 Segregation Table 的違規**，前提是：
+  - 實際 UN3077 所代表的具體物質，**未被指定至特殊 Segregation Group（例如「Acids」、「Alkalis」、「Ammonium nitrate等」）**；  
+  - 危險性主要為「環境危害」，並非會與汽油（Gasoline）產生劇烈化學反應。
+
+---
+
+## 2. 位置合規性評估（依你提供的配置）
+
+### 2.1 實際位置關係
+
+| 項目 | 貨物 A（UN3077） | 貨物 B（UN1203） |
+|------|------------------|------------------|
+| Bay  | 03               | 03               |
+| Row  | 05               | 04               |
+| Tier | 82               | 82               |
+| 位置 | 甲板上           | 甲板上           |
+| Bay 差距 | 0 Bay（同一 Bay） |
+| Row 差距 | 1 Row（約 2.4 m） |
+| 是否緊鄰 | 是，橫向相鄰（同 Tier） |
+
+依常見船公司積載規則，Row 差 1、同 Bay 同 Tier，基本視為 **「緊鄰 CTU（containers are adjacent）」**。
+
+### 2.2 與隔離要求對照
+
+- IMDG 對 **「Away from（代碼 1）」** 的常用解讀：CTU 需至少約 **3 m** 以上距離。[1][8]  
+- 你提供的 Row 差距約 **2.4 m**，若兩者有「away from」要求，則可能略小於常引用的 3 m 參考距離。  
+- 然而，如前述：**UN3077–UN1203 組合在現有資料並未觸發「away from（1）」以上的隔離代碼**，而是 **「X」不必隔離**。[5][9][10]
+
+**因此：**  
+- 就 IMDG Segregation Table 與目前 UN entries 而言，  
+  - **甲板上同 Bay、Row 差 1（約 2.4 m）屬於允許配置**。  
+  - 不存在「必須至少 3 m」、「必須不同 compartment」等強制規定。  
+
+---
+
+## 3. 違規判定
+
+- **隔離要求：**  
+  - Class 3 vs Class 9 → **「X」無特別隔離要求**（前提是 UN 條目沒有額外 segregation code）。[5][8][13]  
+  - UN3077、UN1203 現有公開摘要皆顯示「Segregation provisions：none」。[9][10]
+
+- **你目前的積載配置：**  
+  - 同一 Bay、Row 緊鄰、同 Tier、均在甲板上；  
+  - 未違反「away from / separated from / separated by compartment / separated longitudinally」等任何已知要求。
+
+👉 **判定：**  
+- ✅ **合規** — 目前甲板�
+
+------------------------------------------------------------
+🚨 [違規]  貨物 1(UN3077 @ 030582)  ×  貨物 3(UN1789 @ 030484)
+距離：約 5.7m（近距）
+
+根據 IMDG Code，一般 **Class 9（無副危險）** 與 **Class 8（無副危險）** 在 Segregation Table 中通常為 **“no segregation restriction”（無積載隔離限制）**，也就是說不要求 “away from / separated from / separated by a complete compartment or hold / separated longitudinally by an intervening complete compartment or hold” 等等的隔離等級。  
+但由於我目前無法即時調出最新版 IMDG Code 原文表格，以下判斷會明確標出：**屬於高機率正確的專業推斷**，如需最終對外或對 PSC 說明，仍應以船上 IMDG Code 正本為準。
+
+---
+
+## 1. 隔離要求判定（IMDG Code Segregation）
+
+### 1.1 危險類別組合判斷
+
+- **貨物 A：UN 3077**
+  - Proper Shipping Name：ENVIRONMENTALLY HAZARDOUS SUBSTANCE, SOLID, N.O.S.
+  - Class：**9**
+  - Subsidiary risk：**無**
+  - 特性：主要為對環境有害的固體，通常不屬於強氧化劑、強還原劑或高度反應性物質。
+
+- **貨物 B：UN 1789**
+  - Proper Shipping Name：HYDROCHLORIC ACID
+  - Class：**8（腐蝕性）**
+  - Subsidiary risk：**無**
+  - 為酸性腐蝕液體，遇金屬可能產生氫氣，遇鹼性物質會劇烈中和反應。
+
+### 1.2 依 IMDG Segregation Table 推論
+
+在 IMDG Code General Segregation Table 中，  
+- 行與列分別為 Class 1～9（含副危險），標示 “X”、“1”、“2”、“3”、“4” 或空白。  
+- **Class 9 與多數其他類別（含 Class 8）通常顯示為空白格，代表無一般性 segregation requirement**。  
+- 只有某些具特殊相容性問題的 Class 9（例如含有強氧化性、強反應性物質，或有特別 Segregation Group 指定）才會在 Dangerous Goods List 或 special provisions 中另行要求隔離。
+
+就你提供的資訊：
+- UN 3077（Class 9，無副危險，常見為環境有害但非強反應性固體）
+- UN 1789（Class 8，無副危險）
+
+在一般 IMDG Segregation Table 組合中，**Class 9 vs Class 8** 多數情況下並沒有標示 “1 / 2 / 3 / 4”，而是空白 →  
+代表 **“No segregation required”（無必須的隔離要求）**。
+
+> ⚠️ 重要：  
+> - 若該 UN 3077 所屬的具體物質被納入某個 IMDG “Segregation Group”（例如與酸類不相容），則必須依 Dangerous Goods List 的 footnote / Segregation Group 指定，重新檢視與酸（Acids，如 UN 1789）之間是否要求 “away from” 或更高等級隔離。  
+> - 你題目中未提供 Segregation Group 或特別條款（special provisions），因此以下判斷基於 **“一般 UN 3077，無特別 segregation group”** 的情況。
+
+**結論（在無特別 Segregation Group 前提下）：**  
+- IMDG Segregation Table 對 **Class 9（無副危險）** 與 **Class 8（無副危險）** 之間，為 **無隔離要求**。  
+- 因此不會要求：
+  - **“away from”**（距離或隔一層甲板/隔艙）  
+  - **“separated from”**（由縱向隔艙或甲板完全分開）  
+  - **“separated by a complete compartment or hold from”**  
+  - **“separated longitudinally by an intervening complete compartment or hold from”**  
+
+---
+
+## 2. 位置合規性評估
+
+### 2.1 實際位置回顧
+
+- **貨物 A：UN 3077**
+  - Bay：03  
+  - Row：05  
+  - Tier：82  
+  - 位置：甲板上（on deck）
+
+- **貨物 B：UN 1789**
+  - Bay：03  
+  - Row：04  
+  - Tier：84  
+  - 位置：甲板上（on deck）
+
+### 2.2 幾何位置關係
+
+- Bay 差距：0（同一 Bay，縱向上等於同一橫向截面）
+- Row 差距：1 Row（約 2.4 m，橫向緊鄰）
+- Tier：82 vs 84 →  
+  - 多數船公司編碼中：奇數/偶數 Tier 表示上下位置，82 與 84 通常為 **垂直相鄰兩層（或隔一層）甲板/堆高**，但你已提醒兩者為「緊鄰，高風險」。
+- 兩者皆在 **甲板上（on deck）**，無艙與甲板之間隔。
+
+### 2.3 與 IMDG 隔離要求比對
+
+由於在一般情況下，**Class 9 vs Class 8 無 segregation requirement**：
+
+- IMDG 並未要求 “away from” 或以上等級 →  
+  **即使同 Bay、相鄰 Row、相對接近，亦不構成 IMDG 隔離違規。**
+- 故在你給定的幾何距離下（約橫向 2.4 m，垂直近鄰）：
+  - **符合 IMDG 一般積載相容性要求**（在無其他特別條件的前提下）。
+
+---
+
+## 3. 違規判定
+
+在「UN 3077 無特別 Segregation Group / 無特別 segregation 注記」的前提下：
+
+- **IMDG Segregation 要求**：  
+  - Class 9 vs Class 8 → **無特定隔離要求**。  
+- **實際積載配置**：  
+  - 同 Bay，Row 相差 1，Tier 接近，均在甲板上 → 屬
+
+------------------------------------------------------------
+🚨 [違規]  貨物 1(UN3077 @ 030582)  ×  貨物 4(UN3480 @ 030584)
+距離：約 5.2m（近距）
+
+根據你提供的資訊，**UN3077 與 UN3480 兩者皆為 Class 9**，在 IMDG segregation table 的一般判定下，**Class 9 對 Class 9 通常屬於「無特別隔離要求」**；但**UN3480（Lithium Ion Batteries, UN 3480）**在 IMDG 中屬於需要特別留意的鋰電池貨物，實務上仍需再核對該票貨是否有**包裝方式、特殊條款或船公司/裝載圖限制**。你目前提供的「兩櫃緊鄰、同 bay 同 row、甲板上」位置，**就“Class 9 vs Class 9 的基本隔離”而言，通常不構成 IMDG 隔離違規**；但若該 UN3480 具備其他附加條件，仍可能需要更高等級管控。  
+
+---
+
+### 1. **隔離要求判定**
+
+就你提供的兩票貨物：
+
+- **貨物 A：UN3077 ENVIRONMENTALLY HAZARDOUS SUBSTANCE, SOLID, N.O.S. | Class 9**
+- **貨物 B：UN3480 LITHIUM ION BATTERIES | Class 9**
+
+依 IMDG segregation table 的一般原則，**Class 9 與 Class 9 之間通常沒有額外隔離級別要求**，亦即不會要求：
+- **Away from**
+- **Separated from**
+- **Separated by a complete compartment or hold**
+- **Separated longitudinally**
+
+換言之，**在標準 segregation table 的基本判定中，這一組並非必然要求彼此隔離**。  
+但要特別注意：**UN3480 鋰離子電池**若屬於特定裝載條件、損壞電池、或其他附加危險情境，風險管理不能只看 Class 9 主類別，還要看 **EMS、包裝指示、狀態（完好/損壞/退運/測試品）** 與船公司規範。
+
+---
+
+### 2. **位置合規性評估**
+
+你提供的實際位置：
+
+- **A：030582**
+- **B：030584**
+- **Bay：03 / 03**
+- **Row：05 / 05**
+- **Tier：82 / 84**
+- **位置：甲板上 / 甲板上**
+- **緊鄰：是**
+
+由於兩櫃在**同 bay、同 row、同層面附近**，代表物理上非常接近。  
+但如果依本題給定的**Class 9 vs Class 9 基本隔離要求**來看，**緊鄰本身不構成違規**，因為此組合通常**不要求額外分隔距離**。
+
+因此，**僅就 IMDG segregation 要求判斷：目前配置可視為合規**。  
+不過，若船上 SOP 或船公司風控要求對鋰電池（UN3480）採取**額外保守間距**，則應依公司內規執行更嚴格措施。
+
+---
+
+### 3. **違規判定**
+
+- ✅ **合規** — 依你提供的貨物分類，**UN3077 Class 9 與 UN3480 Class 9 在基本 IMDG segregation table 下通常無需彼此隔離**，因此目前「緊鄰」狀態**不構成明確 IMDG 隔離違規**。
+
+但要補充一點：
+
+- 若後續查證發現 **UN3480** 屬於特殊包裝狀態、損壞電池、或與其他危險性條件併存，則可能需要改按更嚴格的 EMS / 船公司規範處理。
+- 若你們公司的 **WHL FRM** 或航次裝載限制對鋰電池採取更高標準，則仍應以公司規範優先執行。
+
+---
+
+### 4. **風險說明**
+
+雖然本案在**隔離規定上可能合規**，但若兩者任一發生事故，風險仍不可忽視，尤其是 **UN3480 鋰離子電池**：
+
+- **鋰離子電池熱失控（thermal runaway）**可能導致快速升溫、爆裂、噴射火焰與濃煙。
+- 若鄰近貨物為 **UN3077 環境危害物質**，在火災或破損洩漏情境下，可能造成：
+  - 包裝破裂後污染擴散
+  - 滅火後殘液/殘渣污染甲板或舱壁
+  - 需要依 **SOPEP** 及污染控制程序立即處置
+- 若起火位置在甲板貨櫃區，依 WHL FRM：
+  - 需先確認風向、保持 **lee side** 操作
+  - 啟動甲板貨櫃火災程序
+  - 通知 **Maritech Division**
+- 若鋰電池櫃有冒煙或內部燃燒跡象，可能演變為：
+  - **3-3 Deck Container Fire**
+  - 若波及鄰櫃，火勢擴大、濃煙蔓延，甚至需要考慮 abandon ship criteria
+- 若 UN3077 包裝受熱破損並產生洩漏，則應同步啟動 **3-5 Cargo Leakage** 思維：
+  - 設立警戒區
+  - 不可徒手接觸
+  - 必要時使用 **CABA / chemical protective clothing / SOPEP**
+
+---
+
+### 5. **建議措施**
+
+雖然目前判定為**合規**，但我建議採取以下**保守性風險管理**措施：
+
+- **確認 UN3480 的具體包裝狀態**
+  -
+
+------------------------------------------------------------
+🚨 [違規]  貨物 2(UN1203 @ 030482)  ×  貨物 3(UN1789 @ 030484)
+距離：約 5.2m（近距）
+
+這兩件貨物依 IMDG Code 一般類別（Class 3 vs Class 8）判定，**屬於「Away from（隔離等級 1）」** 的標準要求；但依你提供的實際位置，兩櫃屬於**緊鄰、未達 3 公尺安全距離**，因此屬於 **❌違反 IMDG 隔離要求** 的情況。
+
+> 說明：以下分析基於 IMDG Code 一般隔離原則與常用訓練資料；如需最終法律依據，務必以最新版 IMDG Code 正本及公司最新版 Segregation SOP 為準。
+
+---
+
+## 1. 隔離要求判定（IMDG Segregation Table）
+
+### 1.1 類別與性質
+
+- **貨物 A：UN1203 Gasoline（汽油）**
+  - 類別：**Class 3 Flammable liquid（易燃液體）**
+  - 主要危險：高揮發性、低閃點，易形成可燃蒸氣雲，引燃後迅速蔓延。
+  - Stowage：Category E（通常甲板或艙內均可，視船型與旗國額外要求）
+
+- **貨物 B：UN1789 Hydrochloric Acid（鹽酸）**
+  - 類別：**Class 8 Corrosive（腐蝕性液體）**
+  - 主要危險：強酸性，具腐蝕性，與金屬、部分有機物接觸可放熱、產氣。
+  - Stowage：Category C（一般可艙內/甲板 stowage，依規範）
+
+### 1.2 IMDG 一般隔離要求（Class 3 vs Class 8）
+
+依 IMDG Segregation Table，一般情況下：
+
+- **Class 3（Flammable liquids）對 Class 8（Corrosives）**
+  - 表格交叉點多數為 **「1」＝Away from**：
+    - 意義：兩件貨物或兩個 CTU（Container Transport Unit）之間，需保持**至少約 3 公尺（normally ≥3 m）** 的水平距離。
+    - 不要求「Separated from（6m）」或艙間隔離，只要求基本距離。
+
+- 無額外特別 Segregation Code（SGx）指示需更高等級隔離（例如如氧化劑 vs 易燃品）；UN1203 與 UN1789 一般不屬 SG 特別不相容組合。
+
+**結論（隔離等級）：**
+
+- **UN1203（Class 3） vs UN1789（Class 8） → 隔離碼：1 = Away from**
+- 即：**須至少約 3 公尺水平距離，不得緊鄰、貼靠或同位疊放。**
+
+---
+
+## 2. 位置合規性評估
+
+### 2.1 你提供的實際位置
+
+| 項目 | 貨物 A | 貨物 B |
+|------|--------|--------|
+| 位置代碼 | 030482 | 030484 |
+| Bay | 03 | 03 |
+| Row | 04 | 04 |
+| Tier | 82 | 84 |
+| 位置 | 甲板上 | 甲板上 |
+
+**位置關係：**
+
+- **Bay 差距：0 → 同一 Bay**
+- **Row 差距：0 → 同一 Row**
+- **Tier：82 vs 84 → 垂直上下兩層（上下兩 Tier，幾乎正上方）**
+- **是否緊鄰：是（高風險）**
+- 兩者均在 **甲板上（on deck）**
+
+依船公司常用積載標準及 CTU 概念：
+
+- 同一 Bay／同一 Row，Tier 僅差兩層，一般可視為：
+  - **水平距離幾乎 0 m，垂直上方堆疊**。
+  - 易燃液體箱與腐蝕性液體箱 **直接上下或極近位置**。
+
+IMDG 的「Away from」判定重點在**水平距離 ≥約 3m**；垂直方向除非有「防火、防漏甲板」完全隔離，否則不能視為符合「Away from」距離。
+
+在你給的配置：
+
+- **水平距離：0 m（同 Bay/Row） → 未達 3m 要求**
+- 垂直距離：一個箱高約 2.6m～2.9m（40'/45'亦然），但：
+  - 這種垂直疊放並不符合「Away from」的水平分隔要求。
+  - 兩貨物之間仍屬**直接相鄰 CTU**，IMDG Segregation 不視為已隔離。
+
+**位置合規性結論：**
+
+- 目前配置是「**上下層緊鄰**」、水平距離約 0 m。
+- **不符合 IMDG Code 對 Class 3 vs Class 8 要求的「Away from（≥3 m）」距離。**
+
+---
+
+## 3. 違規判定
+
+### 3.1 判定標示
+
+- **✅ 合規** — 不符合（本案不適用）
+- **❌ 違規** — 本案為下列違反情況：
+
+### 3.2 違規內容說明
+
+1. **違反 IMDG Segregation Table 對 Class 3 / Class 8 的「Away from」要求**
+   - IMDG 明確定義：
+     - **Code 1：Away from** → CTU 之間應保持約 **3 公尺** 分隔。
+     - 同 Bay 同 Row，僅 Tier 不同，實務上視為「緊鄰堆疊」，**不屬 Away from**。
+   - 貨物 A（UN1203）與貨物 B（UN1789）目前為：
+     - Row/Bay 完全相同、僅 Tier 差 2 → 水平距離為 0 m。
+   - 因此屬於 **
+
+------------------------------------------------------------
+🚨 [違規]  貨物 2(UN1203 @ 030482)  ×  貨物 4(UN3480 @ 030584)
+距離：約 5.7m（近距）
+
+依 IMDG Code 的一般規定與目前公開資料，**UN1203（汽油，Class 3）與 UN3480（鋰離子電池，Class 9）之間，並無額外的「特殊隔離碼 Segregation Code」要求，僅適用一般「按類別對類別」的 Segregation Table**。在 Class 3 對 Class 9 的格子通常為空白（無數字、無 X），表示 **在不同貨櫃（不同 CTU）之間，無強制最小距離隔離要求**，只需避免同一貨櫃內混裝。  
+在你提供的實際配置下，兩櫃雖然緊鄰，但屬於「不同 CTU」，在無額外公司或船級限制的前提下，**通常視為符合 IMDG 一般隔離要求**。以下分項說明。
+
+---
+
+## 1. 隔離要求判定（IMDG Segregation Table）
+
+1. **按危險類別（Class-based segregation）**  
+   - 貨物 A：**UN1203 – Class 3 Flammable liquid（易燃液體）**  
+   - 貨物 B：**UN3480 – Class 9 Miscellaneous（其他危險物質，鋰電池）**  
+   - 依 IMDG Code 第 7.2.4 之 Segregation Table，讀取「Class 3」對「Class 9」的交叉格：  
+     - 一般情況下，該格為 **空白**（Neither “X” nor numbers 1–4）。  
+     - 依 IMDG 說明：  
+       - 空白：**不需要特別隔離，可相鄰積載，但不得在同一貨櫃（CTU）內混裝不同相互不相容類別的危險品**。  
+       - 數字 1–4 則分別代表：  
+         - **1 – Away from（保持距離，一般參考 ≥3 m）**  
+         - **2 – Separated from（一般參考 ≥6 m）**  
+         - **3 – Separated by a complete compartment or hold from**  
+         - **4 – Separated longitudinally by an intervening complete compartment or hold from**
+
+2. **單獨品名之特殊 Segregation Code**  
+   - UN1203：通常沒有要求與 Class 9 之額外 Segregation Code（多為與 Class 1、5.1 等相關）。  
+   - UN3480：公開實務資料顯示，**標準（非損壞、非廢棄）鋰離子電池，無要求對 Class 3 之額外 segregation code**，僅要求依一般 Segregation Table 操作，且說明「No special requirements for segregation from other classes under standard conditions」。  
+   - 如為 **SP 376/377 損壞/缺陷電池或廢電池**，才會有較嚴格 stowage category（由 A 改 C 或 D）及 SW1/SW2 等要求，但你的題目明確是正常 UN3480，**Stowage Category A**。
+
+👉 **綜合判定：**  
+- 在 IMDG Code 一般規定下，**Class 3 vs Class 9 之間「無強制數字隔離等級」，不屬於 1–4 任一情況**。  
+- 也就是說：**不要求 “Away from/Separated from…” 等距離級別，只需避免同一貨櫃內混裝**，並遵守兩者各自的 stowage、通風、熱源防護要求。
+
+---
+
+## 2. 位置合規性評估（依你提供的實際位置）
+
+### 2.1 位置關係整理
+
+| 項目 | 貨物 A（UN1203） | 貨物 B（UN3480） |
+|------|------------------|------------------|
+| Bay  | 03               | 03               |
+| Row  | 04               | 05               |
+| Tier | 82               | 84               |
+| 艙別 | 甲板上          | 甲板上          |
+| 水平距離 | 1 Row（約 2.4 m） | – |
+| 豎向關係 | B 在 A 上方 2 tiers 左右（約 4.8 m） | – |
+
+- 兩者 **在同一 Bay、相鄰 Row**（側向距離約 2.4 m），且 **同為甲板上 on deck**，屬於典型「相鄰但不同貨櫃」配置。  
+- 未出現「同一貨櫃或托盤混裝」情況。
+
+### 2.2 與 Segregation 要求對照
+
+- 由於 **Class 3 vs Class 9** 在 Segregation Table 無數字要求：  
+  - **不要求最小水平距離（3 m / 6 m 等）**。  
+  - **不要求 by hold / by compartment 隔艙**。  
+- 因此，**現有配置（相鄰 Row，不同 CTU）在 IMDG「一般隔離規定」下是可接受的**，前提是：  
+  - UN1203 所在貨櫃本身不洩漏，無異常揮發。  
+  - UN3480 無損壞、鼓脹、短路風險，為正常合格包裝。  
+  - 船公司及船級未制定更嚴的內部規範（例如公司要求鋰電池「與 Class 3 至少 1 Bay 以上」等）。
+
+---
+
+## 3. 違規判定
+
+- 以 **IMDG Code 一般規定** 評估（不考慮更嚴的公司內規）：
+
+**✅ 合規**  
+- 理由：  
+  1. **Class 3 與 Class 9 之間，Segregation Table 無標示 1–4 號隔離要求。**  
+  2. 兩者分屬 **不同貨�
+
+------------------------------------------------------------
+🚨 [違規]  貨物 3(UN1789 @ 030484)  ×  貨物 4(UN3480 @ 030584)
+距離：約 2.4m（緊鄰）
+
+這兩票貨物依 **IMDG Code** 的標準分類與一般隔離原則來看，**屬於可以相容積載、無特別隔離要求的組合**；就目前 Bay/Row/Tier 的實際位置配置而言，**屬於 ✅ 合規（符合 IMDG 隔離要求）**。  
+以下分項說明。
+
+---
+
+## 1. 隔離要求判定（IMDG Segregation Table）
+
+### (1) 危險品基本資料對照
+
+- **貨物 A：UN1789 HYDROCHLORIC ACID**
+  - 類別：**Class 8（Corrosive 酸性腐蝕性物質）**
+  - Subsidiary risk：無
+  - Stowage category：**C**（可甲板/艙內，依船型與條件）
+- **貨物 B：UN3480 LITHIUM ION BATTERIES**
+  - 類別：**Class 9（Miscellaneous 危險雜項）**
+  - Subsidiary risk：無
+  - Stowage category：**A**（甲板或艙內皆可，限制較少）
+
+### (2) 依 IMDG Segregation Table 判斷
+
+IMDG Code 的 **9×9 危險類別隔離矩陣**中，橫軸為一類別、縱軸為另一類別，各交叉格會標示：
+- **1 = “Away from”**
+- **2 = “Separated from”**
+- **3 = “Separated by a complete compartment or hold from”**
+- **4 = “Separated longitudinally by an intervening complete compartment or hold from”**
+- **X = 不得共艙或有特別限制**
+- 空白或「X」以外：表示 **無特別隔離要求**。
+
+在 **Class 8 (Corrosive)** 與 **Class 9 (Miscellaneous)** 的交叉格，依現行 IMDG Segregation Table 的公開資料與各國海事主管機關的摘錄，顯示為**「無數字（即非 1/2/3/4）」或以 X 以外符號表示無特別隔離要求**，代表：
+- **Class 8 與 Class 9 之間，IMDG Code 並未要求 “Away from” 或更高等級的隔離。**
+- 對 **UN3480 鋰離子電池**的專門說明文件亦指出：  
+  “Check the segregation table for sea transport. There are **no special requirements for segregation**.”  
+  → 即 IMDG Code 對 UN3480 並未強制與 Class 8 進行特殊隔離。
+
+因此，就 **類別與該兩個 UN 編號**來看，IMDG Code 對：
+- **UN1789 (Class 8)** 與  
+- **UN3480 (Class 9)**  
+
+之間的隔離要求為：
+
+> **無特別隔離要求（No special segregation requirements）**  
+> 不屬於 「Away from / Separated from / Separated by a complete compartment / Separated longitudinally」等級。
+
+---
+
+## 2. 位置合規性評估
+
+### (1) 現有位置資訊
+
+| 項目 | 貨物 A (UN1789) | 貨物 B (UN3480) |
+|------|-----------------|-----------------|
+| Bay  | 03              | 03              |
+| Row  | 04              | 05              |
+| Tier | 84              | 84              |
+| 位置 | 甲板上          | 甲板上          |
+
+位置關係：
+- **Bay 差距：0** → 同一 Bay（縱向同一段）
+- **Row 差距：1** → 相鄰 Row，約 **2.4 m** 橫向距離
+- **Tier：相同 Tier** → 高度相同
+- **均在甲板上 (on deck)**
+
+### (2) 與隔離要求比對
+
+IMDG Code 對此組合（Class 8 vs Class 9）未要求 “Away from” 或更高隔離等級，代表：
+- 可以 **同一 Bay**、相鄰 Row、甚至可緊靠，只要：
+  - 不違反各自項下的 **特別條款（Special Provisions）**；
+  - 不違反 **船公司或國家/港口附加規定**；
+  - 貨櫃本身完好、無滲漏、無損壞；
+  - 場站或船舶風險評估接受此配置。
+
+就你提供的配置：
+- **Row 差 1（約 2.4 m）且同 Tier、同 Bay、甲板上**  
+→ 在 **「無特別隔離要求」**的前提下，完全落在 IMDG 所允許的範圍內。
+
+---
+
+## 3. 違規判定
+
+- 依 **IMDG Segregation Table** 一般規定：  
+  - **Class 8 vs Class 9：無特別隔離要求**  
+  - UN3480 公開資料亦明示 **無需特別隔離**。  
+
+**判定：**
+
+- ✅ **合規**  
+  - 目前配置 **符合 IMDG Code 對 UN1789 與 UN3480 的積載隔離要求**。
+  - 不存在「Away from / Separated from / Separated by a complete compartment / Separated longitudinally」之強制要求。
+
+⛔ 若未來有以下情況，可能導致「實質風險」而不是「條文違規」：
+- UN1789 被註記特殊隔離代碼（如 SGxx）要求遠離特定物質（例如強氧化劑、特定有機物等），且 UN3480 隱含或附帶其他危險性（如同艙有 Class 3/5.1 等）；  
+- 船東/租家或港口實務上增加公司規定，要求 **鋰電池不得與腐蝕性液體緊鄰**。  
+
+此�
+
+============================================================
+⚠️  本報告僅供參考，實際操作請依 IMDG Code 官方規定
+============================================================

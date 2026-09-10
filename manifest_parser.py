@@ -100,31 +100,38 @@ def _parse_un_number(raw_un: str) -> str:
 def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
     """
     解析 ASC 格式的船舶積載計畫檔案，提取所有 DG 危險品貨物
-    
-    ASC 位置碼格式：BBRRTT
-        BB = Bay（01~99）
-        RR = Row（01~99）
-        TT = Tier
-            02~18（偶數）= 大艙 Hold
-            70, 72, 74, 76, 78, 80, 82... = 甲板 Deck
+
+    IMDG 段落實際格式（經實測確認，三種變體）：
+        格式A："0001003 186600000  N"  → 序號(4) + Class(3碼) + 空格 + UN(4) + 5碼
+        格式B："0002008 273500000  N"  → 同上
+        格式C："00030022316300000  N"  → 序號(4) + Class(4碼) + UN(4) + 5碼（無空格）
+
+    Class 欄位規律：
+        3碼 Class → 後面有空格（如 003、008）
+        4碼 Class → 後面無空格，直接接 UN（如 0022 = Class 2.2）
     """
     warnings   = []
     cargo_list = []
 
-    # ── 讀取並清理內容 ───────────────────────────────────────
+    # ── 步驟 0：解碼 ─────────────────────────────────────────
+    content = None
     for encoding in ["utf-8", "utf-8-sig", "big5", "latin-1"]:
         try:
             content = file_bytes.decode(encoding, errors="ignore")
             break
         except Exception:
             continue
-    else:
+
+    if content is None:
         return [], ["❌ 無法解析 ASC 檔案編碼"]
 
     content = content.replace("\x00", "").replace("`", "")
     lines   = content.splitlines()
 
-    # ── 第一步：解析標頭資訊 ─────────────────────────────────
+    if not lines:
+        return [], ["❌ 檔案內容為空"]
+
+    # ── 步驟 1：解析標頭 ─────────────────────────────────────
     ship_name = "Unknown"
     voyage    = "Unknown"
     for line in lines[:5]:
@@ -134,7 +141,7 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
             voyage    = m.group(2).strip()
             break
 
-    # ── 第二步：找到 IMDG 區段分隔線 ────────────────────────
+    # ── 步驟 2：定位 IMDG 區段起始行 ────────────────────────
     imdg_section_start = None
     for i, line in enumerate(lines):
         if "Refer to the following IMDG" in line:
@@ -142,42 +149,17 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
             break
 
     if imdg_section_start is None:
-        warnings.append("⚠️ 未找到 IMDG 資料區段（Refer to the following IMDG）")
+        warnings.append("⚠️ 未找到 IMDG 資料區段（***Refer to the following IMDG.）")
         return [], warnings
 
-    # ── 第三步：解析貨物區段，找出 DG 貨物位置與櫃號 ────────
-    #
-    # ASC 貨物行完整格式（固定欄位，空格分隔）：
-    #
-    #   欄1  : 位置碼    6碼數字  BBRRTT
-    #   欄2  : 貨櫃號碼  11碼英數  [A-Z]{4}\d{7}
-    #   欄3  : 業者代碼
-    #   欄4  : 目的港
-    #   欄5  : 貨物代碼  如 2270238F / 4500216F
-    #   欄6  : DG序號（可選，4碼數字 0001~9999）← 只有 DG 貨物才有
-    #   ...  : 其他欄位（重量、行序號等）
-    #
-    # DG 序號識別規則：
-    #   - 出現在貨物代碼（欄5）之後
-    #   - 是獨立的 4碼數字，範圍 0001~9999
-    #   - 行序號（末尾 5碼如 00007）不會被誤抓，因為是 5碼
-    #   - 重量碼（如 23800）是 5碼，也不會被誤抓
-    #
-    # ⚠️ 關鍵：DG 序號是嚴格的 4碼（不多不少）
-    # ─────────────────────────────────────────────────────────
-
+    # ── 步驟 3：掃描貨物行，找出 DG 貨物 ────────────────────
     CARGO_CODE_RE = re.compile(
-        r'\b(?:2200|2230|2250|2270|2500|4300|4350|4500|4530|4550|9500)\d{3}[FE]\b'
+        r'(?:2200|2230|2250|2270|2500|4300|4350|4500|4530|4550|9500)\d{3}[FE]'
     )
-
-    # DG 序號：嚴格 4碼數字，0001~9999
-    # 使用 (?<!\d) 和 (?!\d) 確保前後不是數字（精確匹配4碼）
-    DG_SEQ_RE = re.compile(r'(?<!\d)(0[0-9]{3})(?!\d)')
 
     dg_position_map = {}
 
     for line in lines[:imdg_section_start]:
-        # ── 行首必須是 6 碼數字（位置碼）+ 空白 ──────────────
         if not re.match(r'^\d{6}\s', line):
             continue
 
@@ -185,48 +167,27 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
         if len(parts) < 5:
             continue
 
-        position     = parts[0]   # 行首 6 碼 = 位置碼
-        container_no = parts[1]   # 第二欄 = 貨櫃號碼
-        
+        position     = parts[0]
+        container_no = parts[1]
 
-        # ── 驗證貨櫃號碼格式 ──────────────────────────────────
         if not re.match(r'^[A-Z]{4}\d{7}$', container_no):
             continue
 
-        # ── Tier 判斷：只處理甲板貨物（Tier >= 70）────────────
-        try:
-            tier = int(position[4:6])
-        except ValueError:
-            continue
-
-        if tier < 70:
-            continue   # 大艙貨物，跳過
-
-        # ── 找貨物代碼（確認這是有效的貨物行）───────────────
         cargo_match = CARGO_CODE_RE.search(line)
         if not cargo_match:
             continue
 
-        # ── 在貨物代碼之後，尋找嚴格 4碼 DG 序號 ────────────
-        # 取貨物代碼結束位置之後的文字
         after_cargo = line[cargo_match.end():]
-
-        # 找所有 4碼數字候選
-        candidates = re.findall(r'(?<!\d)(\d{4})(?!\d)', after_cargo)
+        candidates  = re.findall(r'(?<!\d)(\d{4})(?!\d)', after_cargo)
 
         dg_seq = None
         for cand in candidates:
-            val = int(cand)
-            if 1 <= val <= 9999:
-                # 排除明顯是重量或其他用途的值
-                # DG 序號通常是 0001~0999 範圍（本航次最多幾百個 DG）
-                # 但保守起見只排除 0000
-                if cand != "0000":
-                    dg_seq = cand.zfill(4)
-                    break
+            if 1 <= int(cand) <= 9999:
+                dg_seq = cand.zfill(4)
+                break
 
         if dg_seq is None:
-            continue   # 無 DG 序號，普通甲板貨物
+            continue
 
         if dg_seq not in dg_position_map:
             dg_position_map[dg_seq] = {
@@ -235,29 +196,26 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
             }
 
     if not dg_position_map:
-        warnings.append("⚠️ 在甲板貨物區段未找到任何 DG 標記（Tier >= 70）")
+        warnings.append("⚠️ 未找到任何 DG 標記（貨物行中無 4 碼 DG 序號）")
         return [], warnings
 
- # ── 第四步：解析 IMDG 資料區段 ──────────────────────────
+    # ── 步驟 4：解析 IMDG 資料區段 ──────────────────────────
     #
-    # 實際觀察到的行格式變體：
-    #   "00010041271700000               N"
-    #   "0002009 308200000               N      N  0"
-    #   "00140022285700000               N"
+    # 三種實際格式：
+    #   "0001003 186600000  N" → Class=003(3碼)+空格, UN=1866
+    #   "0002008 273500000  N" → Class=008(3碼)+空格, UN=2735
+    #   "00030022316300000  N" → Class=0022(4碼)+無空格, UN=3163
     #
-    # 規則：
-    #   前段（DG序號 + Class + UN資料）一定是數字（含空白）
-    #   後段是任意旗標（N/Y/0 等），可以有多個，不影響前段解析
-    #
-    # 解法：只取行的「前段純數字部分」來解析，忽略後段旗標
+    # 統一正則：
+    #   (\d{4}|\d{3})\s?  →  4碼Class（後無空格）或 3碼Class（後有空格）
+    #   兩者都用 \s? 收尾，4碼時 \s? 匹配0個空格，3碼時匹配1個空格
     # ─────────────────────────────────────────────────────────
 
-    # 只匹配行首的數字資料部分，後面接空白+任意字元都允許
-    IMDG_LINE_RE = re.compile(
-        r'^(\d{4})'           # DG 序號（4碼）
-        r'\s*(\d{3,4})\s*'    # Class 代碼（3或4碼，允許空白分隔）
-        r'(\d{9})'            # UN(4碼) + 其他(5碼) = 9碼
-        r'[\s\S]*$'           # 後面接任何內容（N/Y/0 旗標等）都允許
+    IMDG_RE = re.compile(
+        r'^(\d{4})'           # 序號（4碼）
+        r'(\d{4}|\d{3})\s?'   # Class：4碼（無空格）或 3碼（後接可選空格）
+        r'(\d{4})'            # UN 號碼（4碼）
+        r'\d{5}'              # 其他數字（5碼）
     )
 
     dg_detail_map = {}
@@ -269,26 +227,17 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
             continue
         if line_clean.startswith("$") or line_clean.startswith("*"):
             continue
-
-        # ── 關鍵修正：只驗證「行首數字段」是純數字 ──────────
-        # 取第一個空白區塊之前的所有 token 組合，
-        # 只要行首是 4碼數字開頭就嘗試解析，不再要求整行是純數字
-        #
-        # 原本的過濾邏輯（去掉末尾 N/Y 後剩餘必須是純數字）
-        # 會被 "N  0" 這種多旗標格式誤殺，改為：
-        # 只要行首符合 \d{4} 就嘗試正規表示式匹配
         if not re.match(r'^\d{4}', line_clean):
-            continue   # 行首不是4碼數字，直接跳過（排除聯絡人行等）
+            continue
 
-        m = IMDG_LINE_RE.match(line_clean)
+        m = IMDG_RE.match(line_clean)
         if not m:
             continue
 
         dg_seq    = m.group(1).zfill(4)
         class_raw = m.group(2)
-        un_block  = m.group(3)
+        un_number = m.group(3)
 
-        un_number = un_block[:4]
         if not un_number.isdigit() or un_number == "0000":
             continue
 
@@ -300,8 +249,7 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
                 "class": hazard_class,
             }
 
-
-    # ── 第五步：交叉比對，建立最終貨物清單 ──────────────────
+    # ── 步驟 5：交叉比對，建立最終貨物清單 ──────────────────
     matched_count  = 0
     unmatched_seqs = []
 
@@ -311,9 +259,9 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
         if not detail:
             unmatched_seqs.append(dg_seq)
             warnings.append(
-                f"⚠️ DG編號 {dg_seq}"
+                f"⚠️ DG序號 {dg_seq}"
                 f"（{pos_info['container_no']} @ {pos_info['position']}）"
-                f"：在 IMDG 區段找不到對應詳細資料"
+                f"：IMDG 區段無對應資料"
             )
             continue
 
@@ -326,15 +274,14 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
         description   = ""
         packing_group = ""
 
-        if ems_data["found"]:
+        if ems_data.get("found"):
             fire_code     = ems_data["ems"].get("fire_code",     "")
             spill_code    = ems_data["ems"].get("spillage_code", "")
             description   = ems_data.get("proper_shipping_name", "")
             packing_group = ems_data.get("packing_group",        "")
         else:
             warnings.append(
-                f"⚠️ DG編號 {dg_seq}（UN{un_number}）"
-                f"：查無 IMDG EMS 資料，滅火分類標記為未知"
+                f"⚠️ DG序號 {dg_seq}（UN{un_number}）：查無 EMS 資料"
             )
 
         fire_cat = classify_fire_category(fire_code)
@@ -356,26 +303,27 @@ def parse_asc_file(file_bytes: bytes) -> tuple[list[dict], list[str]]:
             "fire_do":        fire_cat.get("do",         ""),
             "fire_dont":      fire_cat.get("dont",       ""),
             "fire_risk":      fire_cat.get("risk_after", ""),
-            "ems_found":      ems_data["found"],
+            "ems_found":      ems_data.get("found", False),
+            "requires_variant_selection": ems_data.get("requires_variant_selection", False),
+            "variant_status": ems_data.get("variant_status", ""),
             "source":         "ASC",
             "ship_name":      ship_name,
             "voyage":         voyage,
         })
         matched_count += 1
 
+    # ── 步驟 6：組裝摘要訊息 ─────────────────────────────────
     warnings.insert(0,
-        f"✅ ASC 解析完成：找到 {len(dg_position_map)} 個 DG 標記（甲板），"
-        f"成功比對 {matched_count} 筆，"
-        f"未比對 {len(unmatched_seqs)} 筆"
+        f"✅ ASC 解析完成 | 船名：{ship_name} 航次：{voyage} | "
+        f"DG 標記：{len(dg_position_map)} 個 | "
+        f"成功比對：{matched_count} 筆 | "
+        f"未比對：{len(unmatched_seqs)} 筆"
     )
 
     if not cargo_list:
         warnings.append("⚠️ 最終未產生任何有效 DG 貨物記錄")
 
     return cargo_list, warnings
-
-
-
 
 
 
@@ -411,18 +359,45 @@ def _clean_position(raw) -> str:
 
 def parse_manifest_excel(file_bytes: bytes, sheet_name=0) -> tuple[list[dict], list[str]]:
     """解析 Excel 格式的 DG 艙單"""
-    df = pd.read_excel(io.BytesIO(file_bytes), sheet_name=sheet_name, dtype=str)
+    if not file_bytes:
+        return [], ["❌ 檔案內容為空，請確認上傳的是正確的 Excel 檔案"]
+    try:
+        df = pd.read_excel(io.BytesIO(file_bytes), sheet_name=sheet_name, dtype=str)
+    except Exception as e:
+        # 修正：先前這裡沒有 try/except，pandas/openpyxl 的例外（例如空檔案、
+        # 檔案損毀、副檔名為 .xlsx 但內容不是合法 Excel）會直接以完整 Python
+        # Traceback 顯示在畫面上，嚇壞使用者也沒有任何行動建議。
+        # 統一改為與其他解析函式一致的 (list, warnings) 回傳格式，並提示可能原因。
+        return [], [
+            f"❌ 無法解析 Excel 檔案（{type(e).__name__}）：檔案可能已損毀、"
+            "為空白檔案，或副檔名與實際格式不符。請改用「下載範例模板」提供的格式重新製作。"
+        ]
     return _process_dataframe(df)
 
 
 def parse_manifest_csv(file_bytes: bytes) -> tuple[list[dict], list[str]]:
     """解析 CSV 格式的 DG 艙單"""
+    if not file_bytes:
+        return [], ["❌ 檔案內容為空，請確認上傳的是正確的 CSV 檔案"]
+
+    last_error = None
     for encoding in ["utf-8", "utf-8-sig", "big5", "gbk"]:
         try:
             df = pd.read_csv(io.BytesIO(file_bytes), dtype=str, encoding=encoding)
             return _process_dataframe(df)
         except UnicodeDecodeError:
             continue
+        except Exception as e:
+            # 修正：EmptyDataError（空白檔案）、ParserError（格式錯亂的 CSV）等例外
+            # 先前未被捕捉，會以完整 Python Traceback 直接顯示在畫面上。
+            last_error = e
+            break
+
+    if last_error is not None:
+        return [], [
+            f"❌ 無法解析 CSV 檔案（{type(last_error).__name__}）：檔案可能為空白、"
+            "格式錯亂，或欄位分隔符號不是逗號。請改用「下載範例模板」提供的格式重新製作。"
+        ]
     return [], ["❌ 無法解析 CSV 編碼，請另存為 UTF-8 格式後重試"]
 
 
@@ -489,6 +464,8 @@ def _process_dataframe(df: pd.DataFrame) -> tuple[list[dict], list[str]]:
             "fire_dont":      fire_cat.get("dont",      ""),
             "fire_risk":      fire_cat.get("risk_after",""),
             "ems_found":      ems_data["found"],
+            "requires_variant_selection": ems_data.get("requires_variant_selection", False),
+            "variant_status": ems_data.get("variant_status", ""),
             "source":         "Excel/CSV",
             "ship_name":      "",
             "voyage":         "",
@@ -511,17 +488,22 @@ def get_manifest_summary(cargo_list: list[dict]) -> dict:
     color_count = Counter(c["fire_color"]   for c in cargo_list)
     class_count = Counter(c["hazard_class"] for c in cargo_list if c["hazard_class"])
     no_pos      = sum(1 for c in cargo_list if not c["position"])
+    ambiguous   = sum(1 for c in cargo_list if c.get("requires_variant_selection"))
+    ems_known   = sum(1 for c in cargo_list if c.get("fire_ems"))
 
     return {
-        "total":    len(cargo_list),
+        "total":      len(cargo_list),
+        # 顏色不再代表滅火介質或風險等級（規格書 3.5），僅供內部統計沿用既有 key。
         "by_color": {
             "green":  color_count.get("green",  0),
             "yellow": color_count.get("yellow", 0),
             "red":    color_count.get("red",    0),
             "grey":   color_count.get("grey",   0),
         },
-        "by_class":    dict(class_count.most_common()),
-        "no_position": no_pos,
+        "by_class":       dict(class_count.most_common()),
+        "no_position":    no_pos,
+        "ambiguous":      ambiguous,   # requires_variant_selection=true 且尚未選列
+        "ems_known":      ems_known,   # 已取得 EmS Fire Code（僅代表有 code，非詳細指令）
     }
 
 
