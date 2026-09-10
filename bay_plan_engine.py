@@ -429,18 +429,20 @@ def parse_position(pos: str, vessel_id: str | None = None) -> dict | None:
 
 def get_row_label(row: int) -> str:
     """
-    Row 號碼轉可讀標籤（2026-09 第五輪回饋：使用者提供 Bay Plan 視覺化參考
-    圖，欄位標題改用簡潔的 P2／P1／CL／S1／S2 樣式，不含原始 Row 數字或
-    換行，見 docs/KNOWN_LIMITATIONS.md §7.11.1）。
-    00=中心線，奇數=左舷，偶數=右舷。完整數字仍保留在格子 hover tooltip
-    與貨物清單「位置」欄位中，僅此處的座標軸標籤簡化。
+    Row 號碼轉可讀標籤。
+
+    2026-09 第五輪回饋：使用者提供 Bay Plan 視覺化參考圖，欄位標題曾一度
+    改用簡潔的 P2／P1／CL／S1／S2 樣式（見 docs/KNOWN_LIMITATIONS.md
+    §7.11.1）。
+
+    2026-09 第七輪回饋：使用者表示「Bayplan下面顯示應該是用row 不是這個甚麼
+    P1 P3 的」，要求改回顯示實際 Row 號碼本身，與船舶貨櫃位置代碼 BBRRTT 的
+    RR 欄位（app.py「📖 貨櫃位置格式說明」：00=中心線、奇數=左舷、偶數=右舷）
+    及格子 hover tooltip／貨物清單「位置」欄位中的原始數字一致，見
+    docs/KNOWN_LIMITATIONS.md §7.13.1。本函式僅變更顯示文字本身，
+    _row_physical_sort_key() 的左右物理排序邏輯不變。
     """
-    if row == 0:
-        return "CL"
-    elif row % 2 == 1:
-        return f"P{(row + 1) // 2}"   # Port 左舷
-    else:
-        return f"S{row // 2}"          # Starboard 右舷
+    return f"{row:02d}"
 
 
 def get_tier_label(tier: int) -> str:
@@ -634,16 +636,81 @@ def _row_physical_sort_key(row: int) -> int:
         return row // 2            # Starboard 右舷：正值，離中心線越遠越大
 
 
+def _fill_row_range(rows_observed: set[int]) -> list[int]:
+    """
+    純 Python，非 AI（2026-09 第八輪回饋，見 docs/KNOWN_LIMITATIONS.md
+    §7.14.1）。使用者反映 Bay Plan 格狀圖「05旁邊不可能是04 應該是03 01 00
+    這些」——問題根源是先前 get_bay_dimensions() 只把「本系統危險品艙單中
+    實際出現過危險品」的 Row 放進格狀圖座標軸，兩個危險品 Row 之間若還有
+    未登記危險品的 Row（可能是一般貨櫃，也可能是空位——本系統僅追蹤危險品
+    艙單，無法分辨），會被直接跳過、兩欄硬擠在一起，導致畫面上「Row 05
+    緊鄰 Row 04」，但實際上兩者物理位置相差甚遠（中間還有 Row 03/01/00
+    等），造成嚴重誤導。
+
+    Row 編號規則（00＝中心線，往左舷奇數遞增、往右舷偶數遞增，見
+    _row_physical_sort_key()）本身是連續整數，兩個已知 Row 之間的每一個
+    整數 Row 在物理上必定存在（不論該位置是否恰好有危險品）。因此本函式
+    依 _row_physical_sort_key() 算出已知 Row 中最靠左舷與最靠右舷的兩個
+    key，補齊這個範圍內所有整數 key 對應的 Row 號碼（即使該 Row 沒有
+    危險品資料），確保格狀圖橫軸反映真實物理間距，而非只呈現「有危險品
+    的 Row」壓縮排列。
+
+    未觀測到任何 Row 時回傳空清單。
+    """
+    if not rows_observed:
+        return []
+
+    keys = [_row_physical_sort_key(r) for r in rows_observed]
+    min_key, max_key = min(keys), max(keys)
+
+    filled = []
+    for k in range(min_key, max_key + 1):
+        if k == 0:
+            filled.append(0)
+        elif k < 0:
+            filled.append(-2 * k - 1)   # _row_physical_sort_key() 的反函數（Port）
+        else:
+            filled.append(2 * k)        # _row_physical_sort_key() 的反函數（Starboard）
+    return filled
+
+
+def _fill_tier_range(tiers_observed: set[int], step: int = 2) -> list[int]:
+    """
+    純 Python，非 AI（同上，見 §7.14.1）。船舶貨櫃 Tier 編號依國際慣例
+    （ISO 6346 貨櫃位置編號慣例，本系統既有「📖 貨櫃位置格式說明」亦採此
+    慣例）一律為偶數、每層間隔 2（例如 02、04、06…或甲板上 82、84、86…），
+    與 Row（間隔 1 的連續整數）不同。若兩個已知 Tier 之間仍有間隔 2 的
+    Tier 未在危險品艙單中出現，同樣可能是一般貨櫃或空位，理由與
+    _fill_row_range() 相同，故一併補齊，避免格狀圖縱軸也發生相同的
+    「非相鄰 Tier 被壓縮成相鄰」問題。
+
+    未觀測到任何 Tier 時回傳空清單。
+    """
+    if not tiers_observed:
+        return []
+    lo, hi = min(tiers_observed), max(tiers_observed)
+    return list(range(lo, hi + 1, step))
+
+
 def get_bay_dimensions(bay_data: dict) -> dict:
     """
-    計算單一 Bay 的格子範圍（用於繪圖座標）
+    計算單一 Bay 的格子範圍（用於繪圖座標）。
+
+    2026-09 第八輪回饋（見 §7.14.1）：Row／Tier 範圍不再只取「本系統危險品
+    艙單中實際出現過危險品」的座標，而是額外補齊已知座標之間的所有物理
+    存在座標（見 _fill_row_range()／_fill_tier_range()），確保格狀圖正確
+    反映真實物理間距。補齊出來、但危險品艙單中查無資料的格子，
+    _build_bay_grid_figure()（app.py）會顯示為中性「非危險品／一般貨或
+    空位」格子，不上色——只有實際登記為危險品的格子才會依 EmS／Class
+    上色，呼應使用者需求「危險櫃變色就好」。
 
     Returns:
         {
-            "rows":  依實際左右物理順序排列的 row 清單（左舷→中心線→右舷，
-                     見 _row_physical_sort_key()，非原始 Row 編號大小）,
-            "tiers_deck": 排序後的甲板 tier 清單（由下到上）,
-            "tiers_hold": 排序後的艙內 tier 清單（由下到上）,
+            "rows":  依實際左右物理順序排列、已補齊物理間距的 row 清單
+                     （左舷→中心線→右舷，見 _row_physical_sort_key()，
+                     非原始 Row 編號大小）,
+            "tiers_deck": 已補齊物理間距、排序後的甲板 tier 清單（由下到上）,
+            "tiers_hold": 已補齊物理間距、排序後的艙內 tier 清單（由下到上）,
         }
     """
     all_rows        = set()
@@ -658,9 +725,9 @@ def get_bay_dimensions(bay_data: dict) -> dict:
         tiers_hold.add(tier)
 
     return {
-        "rows":        sorted(all_rows, key=_row_physical_sort_key),
-        "tiers_deck":  sorted(tiers_deck),        # 甲板由低到高
-        "tiers_hold":  sorted(tiers_hold),         # 艙內由低到高
+        "rows":        sorted(_fill_row_range(all_rows), key=_row_physical_sort_key),
+        "tiers_deck":  _fill_tier_range(tiers_deck),   # 甲板由低到高，已補齊間距
+        "tiers_hold":  _fill_tier_range(tiers_hold),   # 艙內由低到高，已補齊間距
     }
 
 

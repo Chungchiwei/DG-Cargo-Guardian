@@ -201,17 +201,30 @@ def _build_bay_grid_figure(rows: list, tiers: list, cargo_by_pos: dict, title: s
     """
     fig = go.Figure()
 
+    # 2026-09 第八輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.14.1）：
+    # get_bay_dimensions() 現在會補齊 Row／Tier 之間所有物理存在、但危險品
+    # 艙單中查無資料的座標（見 bay_plan_engine._fill_row_range()／
+    # _fill_tier_range()），格子數量因此變多。這些補齊出來的格子維持中性
+    # 灰階、不上色（只有實際登記為危險品的格子才依 EmS／Class 上色，呼應
+    # 使用者需求「危險櫃變色就好」），並明確以「一般貨／空位」文字標示，
+    # 誠實反映本系統僅追蹤危險品艙單、無法分辨該位置究竟是一般貨櫃還是
+    # 真正空位。
+    _GENERAL_CELL_BG     = "#1e293b"
+    _GENERAL_CELL_BORDER = "#334155"
+    _GENERAL_CELL_TEXT   = "#64748b"
+
     for ti, tier in enumerate(tiers):
         for ri, row in enumerate(rows):
             cargos     = cargo_by_pos.get((row, tier), [])
             cell       = get_cell_display(cargos, color_mode=color_mode)
-            bg_color   = cell["color_hex"]    if cell else "#1e293b"
-            txt_color  = cell["text_color"]   if cell else "#94a3b8"
-            border_hex = cell["border_hex"]   if cell else "#334155"
+            bg_color   = cell["color_hex"]    if cell else _GENERAL_CELL_BG
+            txt_color  = cell["text_color"]   if cell else _GENERAL_CELL_TEXT
+            border_hex = cell["border_hex"]   if cell else _GENERAL_CELL_BORDER
             border_w   = cell["border_width"] if cell else 1
             hover_txt  = (
                 cell["tooltip"] if cell
-                else f"Row {row:02d} / Tier {tier:02d}（空）"
+                else f"Row {row:02d} / Tier {tier:02d} — 非本系統危險品艙單登記範圍"
+                     f"（可能為一般貨櫃或空位，本系統僅追蹤危險品艙單，無法分辨）"
             )
 
             if cell:
@@ -220,7 +233,7 @@ def _build_bay_grid_figure(rows: list, tiers: list, cargo_by_pos: dict, title: s
                 if cell["count"] > 1:
                     text_lbl += f"<br><span style='font-size:0.6em;'>+{cell['count']-1}</span>"
             else:
-                text_lbl = ""
+                text_lbl = "<span style='font-size:0.55em;'>一般貨</span>"
 
             fig.add_shape(
                 type="rect",
@@ -309,7 +322,16 @@ def _render_compact_color_legend(color_mode: str):
         f'margin:3px 0; font-size:0.82rem;">'
         f'<span style="width:13px; height:13px; border-radius:3px; '
         f'border:3px solid #f59e0b; display:inline-block; flex-shrink:0;"></span>'
-        f'待確認品名</span></div>',
+        f'待確認品名</span>'
+        # 2026-09 第八輪回饋（見 §7.14.1）：格狀圖補齊了物理間距後新增大量
+        # 中性「一般貨／空位」格子，於圖例中明確標示其意義，避免使用者誤以
+        # 為是危險品格子或誤判色標涵蓋範圍。
+        f'<span style="display:inline-flex; align-items:center; gap:6px; '
+        f'margin:3px 0; font-size:0.82rem;">'
+        f'<span style="width:13px; height:13px; border-radius:3px; '
+        f'background:#1e293b; border:1px solid #334155; display:inline-block; '
+        f'flex-shrink:0;"></span>'
+        f'一般貨／空位（非本系統危險品艙單登記範圍）</span></div>',
         unsafe_allow_html=True,
     )
 
@@ -943,20 +965,28 @@ elif page == "🤖 AI 事故分析":
     st.markdown('<div class="sub-title">描述事故情境，AI 根據 IMDG 資料給出應急建議</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="warning-banner">'
-        '⚠️ AI 建議為非權威說明，緊急情況請依船上核准之應急聯絡清單聯繫（本系統不提供未經公司核准的第三方聯絡方式）'
+        '⚠️ AI 建議可能有錯誤，緊急情況請依船上應急聯絡清單聯繫項專業單位尋求協助'
         '</div>',
         unsafe_allow_html=True
     )
 
-    # ── 從已上傳 Bay Plan 艙單選擇貨櫃（選填）────────────────────
+    # ── 從已上傳 Bay Plan 艙單選擇貨櫃（選填，可複選）──────────────
     # 真實事故通常發生在「某艘船某個航次某個貨櫃」，而非孤立的 UN 號碼；
     # 若使用者已在「DG Bay Plan」頁面上傳過艙單，這裡可直接選擇實際貨櫃，
     # 自動帶入位置、甲板／艙內判定與鄰近 DG 貨物的 deterministic 隔離狀態，
     # 讓 AI 的說明對應到目前真正裝載的情況（而不只是自由輸入的 UN 號碼）。
+    #
+    # 2026-09 第七輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.13.2）：使用者反映
+    # 「危險櫃可能同時裝有不同種的危險櫃，所以要能輸入多個不同的UN 號碼」——
+    # 選單改為 st.multiselect 可複選多個實際貨櫃；每個選取的貨櫃分別顯示
+    # 自己的情境快照與鄰近 DG 貨物面板，不互相覆蓋。
     loaded_cargo_list = st.session_state.get("dg_cargo_list", [])
-    selected_cargo     = None
-    nearby_summary     = None
-    _NO_CARGO_PICK     = "（不使用，僅手動輸入 UN 號碼）"
+    selected_cargos    = []   # 使用者複選的貨櫃（來自艙單），list[dict]
+    cargo_un_numbers   = []   # 上列貨櫃對應的 UN 號碼（去重、保留順序）
+    # 各貨櫃的鄰近 DG 摘要另存於獨立 dict（依貨櫃號碼），不寫回
+    # st.session_state.dg_cargo_list 內的原始貨物字典，避免污染其他頁面
+    # （例如 Bay Plan 頁）共用的同一份資料結構。
+    nearby_summary_by_container = {}
 
     if loaded_cargo_list:
         cargo_labels = {
@@ -964,36 +994,46 @@ elif page == "🤖 AI 事故分析":
             f"{c['position'] or '無位置'} ｜ {(c['description'] or '')[:20]}": c
             for c in loaded_cargo_list
         }
-        pick = st.selectbox(
-            "🔗 從已上傳 Bay Plan 艙單選擇貨櫃（選填，自動帶入位置與鄰近 DG 貨物資訊）",
-            options=[_NO_CARGO_PICK] + list(cargo_labels.keys()),
+        picks = st.multiselect(
+            "🔗 從已上傳 Bay Plan 艙單選擇貨櫃（可複選，自動帶入位置與鄰近 DG 貨物資訊）",
+            options=list(cargo_labels.keys()),
             key="ai_cargo_picker",
         )
-        if pick != _NO_CARGO_PICK:
-            selected_cargo = cargo_labels[pick]
-            st.session_state.last_un = selected_cargo["un_number"]
+        for pick in picks:
+            cargo = cargo_labels[pick]
+            selected_cargos.append(cargo)
+            if cargo["un_number"] not in cargo_un_numbers:
+                cargo_un_numbers.append(cargo["un_number"])
 
-            # 2026-09 第四輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.10.2）：使用者
-            # 要求移除「未經驗證」字樣，經 AskUserQuestion 明確選擇「整個系統
-            # 移除」——本區塊僅移除顯示文字，parse_position() 判定邏輯本身
-            # 未變更。
-            pos_info  = parse_position(selected_cargo.get("position", "")) if selected_cargo.get("position") else None
-            deck_desc = "未知（缺少有效位置）"
-            if pos_info:
-                deck_desc = "🚢 甲板上 On-Deck" if pos_info["on_deck"] else "🕳️ 艙內 In-Hold"
-
+        if selected_cargos:
+            if len(selected_cargos) == 1:
+                st.session_state.last_un = selected_cargos[0]["un_number"]
             st.markdown("##### 🧭 情境快照（Deterministic，非 AI；將一併提供給 AI 作為背景資料）")
-            snap_c1, snap_c2, snap_c3 = st.columns(3)
-            snap_c1.metric("貨櫃位置", selected_cargo.get("position") or "—")
-            snap_c2.metric("甲板／艙內", deck_desc)
-            snap_c3.metric(
-                "正式品名選列",
-                "📝 待確認品名" if selected_cargo.get("requires_variant_selection") else "✅ 已確定"
-            )
-            with st.expander("📍 鄰近 DG 貨物與隔離狀態", expanded=True):
-                nearby_summary = _render_nearby_dg_panel(
-                    selected_cargo, loaded_cargo_list, radius_m=15.0, key_prefix="ai_page"
+            for idx, cargo in enumerate(selected_cargos, 1):
+                # 2026-09 第四輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.10.2）：
+                # 使用者要求移除「未經驗證」字樣，經 AskUserQuestion 明確選擇
+                # 「整個系統移除」——本區塊僅移除顯示文字，parse_position()
+                # 判定邏輯本身未變更。
+                pos_info  = parse_position(cargo.get("position", "")) if cargo.get("position") else None
+                deck_desc = "未知（缺少有效位置）"
+                if pos_info:
+                    deck_desc = "🚢 甲板上 On-Deck" if pos_info["on_deck"] else "🕳️ 艙內 In-Hold"
+
+                st.markdown(
+                    f"**貨櫃 {idx}／{len(selected_cargos)}：{cargo['container_no']} "
+                    f"（UN{cargo['un_number']}）**"
                 )
+                snap_c1, snap_c2, snap_c3 = st.columns(3)
+                snap_c1.metric("貨櫃位置", cargo.get("position") or "—")
+                snap_c2.metric("甲板／艙內", deck_desc)
+                snap_c3.metric(
+                    "正式品名選列",
+                    "📝 待確認品名" if cargo.get("requires_variant_selection") else "✅ 已確定"
+                )
+                with st.expander(f"📍 {cargo['container_no']} 鄰近 DG 貨物與隔離狀態", expanded=(len(selected_cargos) == 1)):
+                    nearby_summary_by_container[cargo["container_no"]] = _render_nearby_dg_panel(
+                        cargo, loaded_cargo_list, radius_m=15.0, key_prefix=f"ai_page_{idx}"
+                    )
             st.markdown("---")
 
     # 2026-09 修正：col1（UN 號碼）先前顯示標籤文字，col2（事故類型）label 卻
@@ -1004,10 +1044,15 @@ elif page == "🤖 AI 事故分析":
         st.markdown("##### 📝 事故基本資訊")
         col1, col2 = st.columns([1, 1])
         with col1:
+            # 2026-09 第七輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.13.2）：
+            # 使用者反映「危險櫃可能同時裝有不同種的危險櫃，所以要能輸入多個
+            # 不同的UN 號碼」——輸入框改為可接受多個 UN 號碼（以逗號／頓號／
+            # 分號／空白／換行分隔皆可），上方複選的貨櫃 UN 號碼會自動一併
+            # 納入分析，兩者取聯集、不重複。
             un_input = st.text_input(
-                "UN 號碼",
+                "UN 號碼（可輸入多個，以逗號或空白分隔）",
                 value=st.session_state.last_un,
-                placeholder="例如：1203"
+                placeholder="例如：1203, 3077, 1830"
             )
         with col2:
             incident_type = st.selectbox(
@@ -1071,44 +1116,66 @@ elif page == "🤖 AI 事故分析":
 
         analyze_btn = st.button("🤖 開始 AI 分析", type="primary", use_container_width=True)
 
-    if analyze_btn and un_input:
+    # 2026-09 第七輪回饋：解析多個 UN 號碼（手動輸入 ∪ 上方複選貨櫃），
+    # 純字串處理，不涉及任何判斷邏輯。支援逗號、頓號、分號（全形／半形）、
+    # 空白、換行等常見分隔方式。
+    _raw_manual = (un_input or "").strip()
+    for _sep in ("，", "、", ";", "；", "\n", "\t"):
+        _raw_manual = _raw_manual.replace(_sep, ",")
+    manual_un_numbers = []
+    for _piece in _raw_manual.split(","):
+        manual_un_numbers.extend(_piece.split())
+
+    all_un_numbers = []
+    for u in cargo_un_numbers + manual_un_numbers:
+        u = u.strip()
+        if u and u not in all_un_numbers:
+            all_un_numbers.append(u)
+
+    if analyze_btn and all_un_numbers:
         st.session_state.last_un = un_input.strip()
 
-        data = query_ems(un_input.strip())
-        if data["found"]:
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("UN 號碼",  data["un_number"])
-            col_b.metric("物質名稱", data["proper_shipping_name"])
-            col_c.metric("危險品類別", f"Class {data['hazard_class']}")
+        ems_lookup = {u: query_ems(u) for u in all_un_numbers}
+        for u in all_un_numbers:
+            data = ems_lookup[u]
+            if data["found"]:
+                col_a, col_b, col_c = st.columns(3)
+                col_a.metric("UN 號碼",  data["un_number"])
+                col_b.metric("物質名稱", data["proper_shipping_name"])
+                col_c.metric("危險品類別", f"Class {data['hazard_class']}")
+            else:
+                st.warning(f"⚠️ UN{u}：資料庫查無此 UN 號碼")
 
         st.markdown("---")
         st.markdown("#### 🤖 AI 應急建議")
 
-        # 若使用者從上方選擇了實際已載入的貨櫃，組裝 deterministic 情境快照
-        # 一併提供給 AI（見 ai_analyzer._build_situation_context）；未選擇時
-        # vessel_context 維持 None，行為與先前僅輸入 UN 號碼時相同。
+        # 若使用者從上方複選了實際已載入的貨櫃，組裝 deterministic 情境快照
+        # （每個選取的貨櫃各自一份）一併提供給 AI（見
+        # ai_analyzer._build_situation_context）；完全未選擇貨櫃、僅手動輸入
+        # UN 號碼時 vessel_context 維持 None，行為與先前相同。
         vessel_context = None
-        if selected_cargo and selected_cargo.get("un_number") == un_input.strip():
-            # 僅在使用者未手動把 UN 號碼改成與所選貨櫃不同的號碼時才附上情境快照，
-            # 避免「快照講的是貨櫃 A，但實際分析的是使用者改填的 UN B」這種錯位。
-            pos_info = (
-                parse_position(selected_cargo.get("position", ""))
-                if selected_cargo.get("position") else None
-            )
-            vessel_context = {
-                "vessel_name":      selected_cargo.get("ship_name") or "",
-                "voyage":           selected_cargo.get("voyage") or "",
-                "container_no":     selected_cargo.get("container_no", ""),
-                "position":         selected_cargo.get("position", ""),
-                "on_deck":          pos_info["on_deck"] if pos_info else None,
-                "on_deck_verified": pos_info["on_deck_verified"] if pos_info else False,
-                "ambiguous":        bool(selected_cargo.get("requires_variant_selection")),
-                "nearby_summary":   nearby_summary,
-            }
+        if selected_cargos:
+            containers = []
+            for cargo in selected_cargos:
+                pos_info = (
+                    parse_position(cargo.get("position", ""))
+                    if cargo.get("position") else None
+                )
+                containers.append({
+                    "vessel_name":      cargo.get("ship_name") or "",
+                    "voyage":           cargo.get("voyage") or "",
+                    "container_no":     cargo.get("container_no", ""),
+                    "position":         cargo.get("position", ""),
+                    "on_deck":          pos_info["on_deck"] if pos_info else None,
+                    "on_deck_verified": pos_info["on_deck_verified"] if pos_info else False,
+                    "ambiguous":        bool(cargo.get("requires_variant_selection")),
+                    "nearby_summary":   nearby_summary_by_container.get(cargo.get("container_no")),
+                })
+            vessel_context = {"containers": containers}
 
         with st.spinner("AI 正在分析事故情境..."):
             result = analyze_incident(
-                un_number       = un_input.strip(),
+                un_numbers      = all_un_numbers,
                 incident_type   = incident_type,
                 additional_info = additional,
                 vessel_context  = vessel_context,
@@ -1118,8 +1185,8 @@ elif page == "🤖 AI 事故分析":
         st.markdown(result)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    elif analyze_btn and not un_input:
-        st.warning("⚠️ 請輸入 UN 號碼")
+    elif analyze_btn and not all_un_numbers:
+        st.warning("⚠️ 請輸入至少一個 UN 號碼，或從上方艙單選擇至少一個貨櫃")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -1130,7 +1197,7 @@ elif page == "🔄 積載隔離檢查":
     st.markdown('<div class="main-title">🔄 積載隔離檢查</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">輸入 UN 號碼與貨櫃位置，檢查是否違反 IMDG 隔離規定</div>', unsafe_allow_html=True)
 
-    with st.expander("📖 貨櫃位置格式說明 (BBRRTT)"):
+    with st.expander("📖 貨櫃位置說明"):
         st.markdown("""
         | 欄位 | 說明 | 範例 |
         |------|------|------|
@@ -1147,7 +1214,7 @@ elif page == "🔄 積載隔離檢查":
     # 確認數值一致，見 segregation_engine.py 檔案開頭說明），僅供人工目視
     # 對照，不是新的判斷邏輯——下方「隔離檢查結果」仍完全依既有 deterministic
     # engine／AI 判斷顯示，此表不參與任何計算。
-    with st.expander("📋 附表三　危險品隔離表（原文對照，供人工核對）", expanded=False):
+    with st.expander("📋 附表三　危險品隔離表", expanded=False):
         st.caption(
             "公司文件「附表三 危險品隔離表」原文重現，"
             "數值已與系統一般類別隔離表逐格核對一致。"
@@ -1417,10 +1484,10 @@ elif page == "🔄 積載隔離檢查":
             if ai_uncertain_count > 0:
                 st.warning(f"❓ 共 {ai_uncertain_count} / {pairs_count} 組配對 AI 判定為「無法確定」，請人工查閱下方系統資料並依船上核准文件確認。")
             if ai_violation_count == 0 and ai_uncertain_count == 0:
-                st.success(f"✅ 共檢查 {pairs_count} 組配對，AI 判定均未發現隔離問題（仍為非權威判斷，請見下方各組詳情）。")
+                st.success(f"✅ 共檢查 {pairs_count} 組配對，AI 判定均未發現隔離問題。")
             st.caption(
-                "⚠️ 以上為 AI 直接產生的判斷，非公司核准之權威合規判定，可能有誤，"
-                "最終決定權屬大副／船長；下方各組另附 deterministic 系統資料供覆核。"
+                "⚠️ 以上為 AI 直接產生的判斷，可能有誤，"
+                "最終決定權屬大副／船長覆核。"
             )
             with st.expander("⚫ deterministic 系統資料摘要（次要參考，非畫面主要結論）"):
                 if violation_count > 0:
@@ -1497,7 +1564,7 @@ elif page == "🔄 積載隔離檢查":
                 if not ai_judge and AI_ENABLED:
                     # 理論上不會發生（AI_ENABLED 時一定會計算 ai_judge），保留作為
                     # fail-safe：若真的發生，仍提供舊版「AI 轉譯」功能不中斷使用。
-                    if st.toggle("🤖 顯示 AI 文字說明（非權威，僅轉譯上方結果）", key=f"seg_ai_toggle_{res_i}"):
+                    if st.toggle("🤖 AI說明", key=f"seg_ai_toggle_{res_i}"):
                         st.markdown(explain_segregation_result(seg))
 
         st.markdown("---")
@@ -2180,7 +2247,7 @@ elif page == "🗺️ DG Bay Plan":
     )
 
     if AI_ENABLED:
-        if st.button("🤖 產生 AI 文字說明（非權威，僅整理上述事實）", use_container_width=True, key="ai_risk_summary"):
+        if st.button("🤖 AI說明", use_container_width=True, key="ai_risk_summary"):
             summary_lines = [
                 f"貨物總數：{len(cargo_list)}",
                 f"待確認品名：{len(ambiguous_cargos)} 筆",
