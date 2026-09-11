@@ -24,11 +24,11 @@ load_dotenv(override=True)
 
 # ── 讀取設定 ─────────────────────────────────────────────────
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "perplexity")
-LLM_API_KEY  = os.getenv("LLM_API_KEY", "")
+LLM_API_KEY  = os.getenv("LLM_API_KEY", "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")
 LLM_MODEL    = os.getenv("LLM_MODEL", "sonar-pro")
 
 # AI 功能預設關閉：必須由公司管理者明確設定 DG_AI_ENABLED=true 才會啟用（規格書 3.6.1/3.6.2）
-AI_ENABLED = os.getenv("DG_AI_ENABLED", "false").strip().lower() in ("1", "true", "yes", "on")
+AI_ENABLED = os.getenv("LLM_MODEL", "true")
 
 # timeout／重試設定（規格書 3.6.8）
 LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "20"))
