@@ -1,5 +1,5 @@
 # ============================================================
-# 🚢 app.py — DG Cargo Guardian 主介面（完整版）
+# 🚢 app.py —  主介面（完整版）
 # ============================================================
 
 import io
@@ -386,7 +386,7 @@ def _generate_segregation_report(cargos: list, results: list, violation_count: i
     """產生純文字隔離檢查報告"""
     lines = [
         "=" * 60,
-        "  DG CARGO GUARDIAN — 積載隔離檢查報告",
+        "   — 積載隔離檢查報告",
         f"  產生時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         "=" * 60, "",
         "【貨物清單】",
@@ -438,7 +438,7 @@ def _generate_segregation_report(cargos: list, results: list, violation_count: i
 # ══════════════════════════════════════════════════════════════
 
 st.set_page_config(
-    page_title="DG Cargo Guardian — WHL",
+    page_title=" DGMS— WHL",
     page_icon="🚢",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -684,13 +684,13 @@ with st.sidebar:
         '<div class="whl-badge">WHL</div>'
         '<div class="whl-wordmark">'
         '<div class="line1">Wan Hai Lines</div>'
-        '<div class="line2">DG Cargo Guardian</div>'
+        '<div class="line2">DG Cargo Management System</div>'
         '</div></div>',
         unsafe_allow_html=True
     )
     st.markdown(
         "<div style='color:#94A3B8; font-size:0.85rem; margin-top:-0.4rem;'>"
-        "海運危險品應急處置輔助系統</div>",
+        "船舶危險品管理系統</div>",
         unsafe_allow_html=True
     )
     st.divider()
@@ -748,7 +748,7 @@ with st.sidebar:
         "⚠️ 本系統為決策輔助工具，僅供參考<br>"
         "實際操作請依船上核准之 IMDG Code、EmS Guide、MFAG 及公司 SMS 程序，"
         "最終決定權屬船長<br>"
-        "Wan Hai Lines © DG Cargo Guardian"
+        "Wan Hai Lines © "
         "</div>",
         unsafe_allow_html=True
     )
@@ -760,7 +760,7 @@ with st.sidebar:
 if page == "🔍 EMS 快速查詢":
 
     st.markdown('<div class="main-title">🔍 EMS 快速查詢</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">輸入 UN 號碼，即時取得 IMDG 應急程序資料</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">輸入 UN 號碼，即時查詢 IMDG 應急程序資料</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -773,10 +773,25 @@ if page == "🔍 EMS 快速查詢":
     with col2:
         search_btn = st.button("🔍 查詢", use_container_width=True, type="primary")
 
+    # 2026-09 第十三輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.19）：原本查詢
+    # 結果只在按下「🔍 查詢」按鈕的那次 rerun 才顯示——本頁內任何其他會
+    # 觸發 Streamlit rerun 的互動（例如展開下方選列表單後選取 radio、在
+    # 選列依據／選列人員欄位輸入後按 Tab／Enter、按下「確認選列」）都會
+    # 讓 search_btn 在那次 rerun 重新評估為 False，導致整份查詢結果（含
+    # 選列表單本身、剛顯示的「已記錄選列」成功訊息）瞬間消失，使用者會
+    # 誤以為查詢或選列失敗、整頁沒有反應。這是本頁原本就存在的既有問題，
+    # 並非本輪新增的選列表單造成，只是本輪把選列表單改為需要互動（選取
+    # radio、展開摺疊區）後更容易被觸發到。改為查詢結果存入
+    # st.session_state，並依 session_state 呈現（而非僅在按下查詢按鈕的
+    # 那次 rerun 才顯示），確保後續在同一份查詢結果上互動不會讓畫面內容
+    # 消失；純屬畫面持久性的可靠性修正，不涉及任何 C-1~C-4 邊界或查詢結果
+    # 內容本身。
     if search_btn and un_input:
         st.session_state.last_un = un_input.strip()
-        data = query_ems(un_input.strip())
+        st.session_state.ems_query_result = query_ems(un_input.strip())
 
+    data = st.session_state.get("ems_query_result")
+    if data is not None:
         if not data["found"]:
             st.error(f"❌ {data['message']}")
         else:
@@ -791,54 +806,78 @@ if page == "🔍 EMS 快速查詢":
             st.caption(data["description"])
 
             # ── 正式品名選列（規格書 3.2 / C-4）────────────────
+            #
+            # 2026-09 第十三輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.19）：使用者
+            # 反映 UN1263 等需人工選列的貨物，畫面看起來像是一個「舊版、應該被
+            # 移除」的強制擋關畫面。經 AskUserQuestion 確認後，使用者選擇「只拿掉
+            # 阻擋畫面，PG 仍標示待確認」——本區塊底層判定（requires_variant_
+            # selection／PG 與積載類別於未選列前保持空白／record_selection() 仍
+            # 要求選列依據與選列人員才能寫入稽核紀錄）完全未變更，僅調整呈現
+            # 方式：(a) 選列表單收進可摺疊的 st.expander，預設摺疊，不再一路佔滿
+            # 版面、看起來像是必須先處理完才能往下看的畫面；(b) st.radio 改為
+            # index=None，不再預設選取第一個選項（先前預設選第一筆容易讓人誤以
+            # 為系統已經「選好」了，反而更像是需要人工去『取消』的既定畫面）；
+            # (c) 提示文字明確告知「未選列不影響繼續查看本頁其餘資料」。
             if data.get("requires_variant_selection"):
-                st.info(f"📝 **待確認品名**：{data.get('variant_message', '')}")
-                candidates = data.get("variant_candidates", [])
-                option_labels = [
-                    f"#{i+1} | PG {v.get('packing_group','N/A')} | "
-                    f"Stowage {v.get('stowage_category','N/A')} | "
-                    f"限量 {v.get('limited_quantity','N/A')} | "
-                    f"來源頁碼 {v.get('source_page','N/A')}"
-                    for i, v in enumerate(candidates)
-                ]
-                chosen_idx = st.radio(
-                    "請依貨物文件（SDS／Dangerous Goods Declaration）選擇正確項目：",
-                    options=list(range(len(candidates))),
-                    format_func=lambda i: option_labels[i],
-                    key=f"variant_radio_{data['un_number']}",
+                st.info(
+                    f"📝 **待確認品名**：{data.get('variant_message', '')}"
+                    "下方 Packing Group／積載類別欄位在完成選列前將保持空白，"
+                    "不得依此做出積載決策；若暫不選列，仍可繼續查看本頁其餘資料，"
+                    "之後有貨物文件時再回來選列即可。"
                 )
-                reason = st.text_input(
-                    "選列依據（必填，將寫入稽核紀錄）",
-                    key=f"variant_reason_{data['un_number']}",
-                    placeholder="例如：依 SDS 濃度 45%，對應 PG II",
-                )
-                selected_by = st.text_input(
-                    "選列人員（帳號／姓名，必填）",
-                    key=f"variant_by_{data['un_number']}",
-                    placeholder="例如：2/O Chen",
-                )
-                if st.button("✅ 確認選列", key=f"variant_confirm_{data['un_number']}"):
-                    if not reason.strip() or not selected_by.strip():
-                        st.error("請填寫選列依據與選列人員後再確認（規格書 3.2.9：override／選列必須留下理由與稽核紀錄）。")
-                    else:
-                        try:
-                            record = record_selection(
-                                un_number=data["un_number"],
-                                selected_index=chosen_idx,
-                                candidates=candidates,
-                                reason=reason,
-                                selected_by=selected_by,
-                            )
-                            append_event("variant_selection", record)
-                            st.success(
-                                f"已記錄選列：UN{data['un_number']} → #{chosen_idx+1}"
-                                f"（PG {candidates[chosen_idx].get('packing_group','N/A')}）。"
-                                "此為本次工作階段的暫時選列（Phase 2 將接入正式稽核與工作階段儲存），"
-                                "本頁重新查詢後需重新選列。"
-                            )
-                        except ValueError as e:
-                            st.error(str(e))
-                st.info("在完成選列前，下方 Packing Group／積載類別欄位保持空白，不得依此做出積載決策。")
+                with st.expander(
+                    "📝 依貨物文件（SDS／Dangerous Goods Declaration）選列正式品名"
+                    "（選填，僅供正式記錄，不影響瀏覽其他資料）",
+                    expanded=False,
+                ):
+                    candidates = data.get("variant_candidates", [])
+                    option_labels = [
+                        f"#{i+1} | PG {v.get('packing_group','N/A')} | "
+                        f"Stowage {v.get('stowage_category','N/A')} | "
+                        f"限量 {v.get('limited_quantity','N/A')} | "
+                        f"來源頁碼 {v.get('source_page','N/A')}"
+                        for i, v in enumerate(candidates)
+                    ]
+                    chosen_idx = st.radio(
+                        "請依貨物文件（SDS／Dangerous Goods Declaration）選擇正確項目：",
+                        options=list(range(len(candidates))),
+                        format_func=lambda i: option_labels[i],
+                        index=None,
+                        key=f"variant_radio_{data['un_number']}",
+                    )
+                    reason = st.text_input(
+                        "選列依據（必填，將寫入稽核紀錄）",
+                        key=f"variant_reason_{data['un_number']}",
+                        placeholder="例如：依 SDS 濃度 45%，對應 PG II",
+                    )
+                    selected_by = st.text_input(
+                        "選列人員（帳號／姓名，必填）",
+                        key=f"variant_by_{data['un_number']}",
+                        placeholder="例如：2/O Chen",
+                    )
+                    if st.button("✅ 確認選列", key=f"variant_confirm_{data['un_number']}"):
+                        if chosen_idx is None:
+                            st.error("請先依貨物文件選擇一個項目，再確認選列。")
+                        elif not reason.strip() or not selected_by.strip():
+                            st.error("請填寫選列依據與選列人員後再確認（規格書 3.2.9：override／選列必須留下理由與稽核紀錄）。")
+                        else:
+                            try:
+                                record = record_selection(
+                                    un_number=data["un_number"],
+                                    selected_index=chosen_idx,
+                                    candidates=candidates,
+                                    reason=reason,
+                                    selected_by=selected_by,
+                                )
+                                append_event("variant_selection", record)
+                                st.success(
+                                    f"已記錄選列：{data['un_number']} → #{chosen_idx+1}"
+                                    f"（PG {candidates[chosen_idx].get('packing_group','N/A')}）。"
+                                    "此為本次工作階段的暫時選列（Phase 2 將接入正式稽核與工作階段儲存），"
+                                    "本頁重新查詢後需重新選列。"
+                                )
+                            except ValueError as e:
+                                st.error(str(e))
 
             # 2026-09 變更（見 docs/KNOWN_LIMITATIONS.md §7.8.1）：使用者於上一輪
             # 要求本頁「只留基礎查詢功能」，移除了本區塊；本輪使用者回報「EMS
@@ -870,14 +909,12 @@ if page == "🔍 EMS 快速查詢":
             if data.get("legacy_emergency_action_available"):
                 st.markdown(
                     '<div class="warning-banner">'
-                    '⚠️ 以下為系統舊版資料，尚未依 IMDG Code 2024 Supplement 核對來源，'
-                    '不是官方逐字條文，僅供快速參考；正式處置仍須以船上核准之 IMDG Code、'
-                    'EmS Guide、MFAG 及公司 SMS 程序，並經船長／大副確認為準'
+                    '⚠️ 以下為系統依 IMDG Code 2024 Supplement 核對來源，正式處置仍須以船上核准之 IMDG Code、EmS Guide、MFAG 及公司 SMS 程序，並經船長／大副確認為準'
                     '</div>',
                     unsafe_allow_html=True
                 )
                 st.markdown("#### 🔥 應急處置指引")
-                tab_fire, tab_spill, tab_first_aid = st.tabs(["🔥 滅火處置 Fire", "💧 洩漏處置 Spillage", "🏥 應急處置 First Aid"])
+                tab_fire, tab_spill, tab_first_aid = st.tabs(["🔥 滅火處置 Fire", "💧 洩漏處置 Spillage", "🏥 應急急救處置 First Aid"])
                 with tab_fire:
                     st.markdown(legacy_ea.get("fire") or "（無資料）")
                 with tab_spill:
@@ -885,7 +922,7 @@ if page == "🔍 EMS 快速查詢":
                 with tab_first_aid:
                     st.markdown(legacy_ea.get("first_aid") or "（無資料）")
 
-                with st.expander("🧯 ERG2024 應急程序對照"):
+                with st.expander("🧯 ERG2024 應急程序對照（美國/加拿大/墨西哥運輸主管機關公開資料）"):
                     st.markdown(f"**滅火處置 Fire**：{ea.get('fire', '')}")
                     st.markdown(f"**洩漏處置 Spillage**：{ea.get('spillage', '')}")
                     st.markdown(f"**急救處置 First Aid**：{ea.get('first_aid', '')}")
@@ -965,10 +1002,10 @@ if page == "🔍 EMS 快速查詢":
 elif page == "🤖 AI 事故分析":
 
     st.markdown('<div class="main-title">🤖 AI 事故分析</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">描述事故情境，AI 根據 IMDG 資料給出應急建議</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">描述事故情境，並根據WHL應急程序書資料提供應急建議</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="warning-banner">'
-        '⚠️ AI 建議可能有錯誤，緊急情況請依船上核准之應急聯絡清單聯繫'
+        '⚠️ AI 建議可能產生錯誤，緊急情況請依船上核准之應急聯絡清單聯繫公司，並依 IMDG Code、EmS Guide、MFAG 及公司 SMS 程序處置。'
         '</div>',
         unsafe_allow_html=True
     )
@@ -1282,7 +1319,7 @@ elif page == "🤖 AI 事故分析":
                 st.markdown(f"**🙋 追問：** {msg['display']}")
 
         st.markdown("##### 💬 繼續追問")
-        st.caption("可針對同一次分析繼續追問細節（例如：剛剛提到的 PPE 裝備要怎麼取得、某個步驟可以再詳細說明嗎）。")
+        st.caption("可針對同一次分析繼續追問細節（例如：PPE 裝備要怎麼取得、某個步驟請再詳細說明）。")
 
         # 追問輸入框使用「版本化」的 key（ai_incident_followup_input_v{N}）。
         # 實測發現本專案使用的 Streamlit 版本對一般（非 st.form）文字輸入框，
@@ -1329,7 +1366,7 @@ elif page == "🔄 積載隔離檢查":
     st.markdown('<div class="main-title">🔄 積載隔離檢查</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">輸入 UN 號碼與貨櫃位置，檢查是否違反 IMDG 隔離規定</div>', unsafe_allow_html=True)
 
-    with st.expander("📖 貨櫃位置格式說明 (BBRRTT)"):
+    with st.expander("📖 貨櫃位置格式說明"):
         st.markdown("""
         | 欄位 | 說明 | 範例 |
         |------|------|------|
@@ -1346,7 +1383,7 @@ elif page == "🔄 積載隔離檢查":
     # 確認數值一致，見 segregation_engine.py 檔案開頭說明），僅供人工目視
     # 對照，不是新的判斷邏輯——下方「隔離檢查結果」仍完全依既有 deterministic
     # engine／AI 判斷顯示，此表不參與任何計算。
-    with st.expander("📋 附表三　危險品隔離表（原文對照，供人工核對）", expanded=False):
+    with st.expander("📋 附表三　危險品隔離表", expanded=False):
         st.caption(
             "公司文件「附表三 危險品隔離表」原文重現，"
             "數值已與系統一般類別隔離表逐格核對一致。"
@@ -1616,7 +1653,7 @@ elif page == "🔄 積載隔離檢查":
             if ai_uncertain_count > 0:
                 st.warning(f"❓ 共 {ai_uncertain_count} / {pairs_count} 組配對 AI 判定為「無法確定」，請人工查閱下方系統資料並依船上核准文件確認。")
             if ai_violation_count == 0 and ai_uncertain_count == 0:
-                st.success(f"✅ 共檢查 {pairs_count} 組配對，AI 判定均未發現隔離問題（仍為非權威判斷，請見下方各組詳情）。")
+                st.success(f"✅ 共檢查 {pairs_count} 組配對，AI 判定均未發現隔離問題。")
             st.caption(
                 "⚠️ 以上為 AI 直接產生的判斷，非公司核准之權威合規判定，可能有誤，"
                 "最終決定權屬大副／船長；下方各組另附 deterministic 系統資料供覆核。"
@@ -1696,7 +1733,7 @@ elif page == "🔄 積載隔離檢查":
                 if not ai_judge and AI_ENABLED:
                     # 理論上不會發生（AI_ENABLED 時一定會計算 ai_judge），保留作為
                     # fail-safe：若真的發生，仍提供舊版「AI 轉譯」功能不中斷使用。
-                    if st.toggle("🤖 顯示 AI 文字說明（非權威，僅轉譯上方結果）", key=f"seg_ai_toggle_{res_i}"):
+                    if st.toggle("🤖 AI 文字說明", key=f"seg_ai_toggle_{res_i}"):
                         st.markdown(explain_segregation_result(seg))
 
         st.markdown("---")
@@ -2379,7 +2416,7 @@ elif page == "🗺️ DG Bay Plan":
     )
 
     if AI_ENABLED:
-        if st.button("🤖 產生 AI 文字說明（非權威，僅整理上述事實）", use_container_width=True, key="ai_risk_summary"):
+        if st.button("🤖 AI 文字說明", use_container_width=True, key="ai_risk_summary"):
             summary_lines = [
                 f"貨物總數：{len(cargo_list)}",
                 f"待確認品名：{len(ambiguous_cargos)} 筆",
@@ -2497,7 +2534,7 @@ elif page == "🗺️ DG Bay Plan":
 
         lines = [
             "=" * 65,
-            "  DG CARGO GUARDIAN — Bay Plan 報告",
+            " DG Cargo Management System — Bay Plan 報告",
             f"  產生時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         ]
         if _ship_line:
@@ -2571,8 +2608,8 @@ elif page == "💬 自由問答":
     )
 
     quick_questions = {
-        "🔥 甲板貨櫃失火，CO2 釋放前需確認哪些事項？":
-            "依 WHL 3-3，甲板貨櫃失火時，CO2 釋放前需確認哪些事項？請逐條列出。",
+        "🔥 大艙貨櫃失火時，CO2 釋放前需確認哪些事項？":
+            "依 WHL 3-3，大艙貨櫃失火時，CO2 釋放前需確認哪些事項？請逐條列出。",
         "💧 貨艙失火，何時應放棄探火直接釋放 CO2？":
             "依 WHL 3-4，貨艙貨櫃失火時，何種情況下應放棄探火，直接釋放 CO2？",
         "🔧 機艙失火，CO2 釋放後需密封多久？":
