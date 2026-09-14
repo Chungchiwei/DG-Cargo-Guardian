@@ -24,7 +24,7 @@ load_dotenv(override=True)
 
 # ── 讀取設定 ─────────────────────────────────────────────────
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "perplexity")
-LLM_API_KEY  = os.getenv("LLM_API_KEY", "")
+LLM_API_KEY  = os.getenv("LLM_API_KEY", "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")
 LLM_MODEL    = os.getenv("LLM_MODEL", "sonar-pro")
 
 # AI 功能預設關閉：必須由公司管理者明確設定 DG_AI_ENABLED=true 才會啟用（規格書 3.6.1/3.6.2）
@@ -47,7 +47,7 @@ AI_ENABLED = os.getenv("DG_AI_ENABLED", "true")
 # 因此不需要 AskUserQuestion，直接修正：預設值由 20 秒調高為 60 秒（可由
 # 管理者以環境變數 LLM_TIMEOUT_SECONDS 覆寫調整，例如網路更慢的環境可
 # 再調高）。
-LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "60"))
+LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "90"))
 LLM_MAX_RETRIES     = int(os.getenv("LLM_MAX_RETRIES", "1"))
 
 # Provider allowlist（規格書 3.6.7）——目前僅開放已知兩家，未來由管理者擴充/設定檔管理
