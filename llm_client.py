@@ -24,14 +24,30 @@ load_dotenv(override=True)
 
 # ── 讀取設定 ─────────────────────────────────────────────────
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "perplexity")
-LLM_API_KEY  = os.getenv("LLM_API_KEY", "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")
+LLM_API_KEY  = os.getenv("LLM_API_KEY", "")
 LLM_MODEL    = os.getenv("LLM_MODEL", "sonar-pro")
 
 # AI 功能預設關閉：必須由公司管理者明確設定 DG_AI_ENABLED=true 才會啟用（規格書 3.6.1/3.6.2）
-AI_ENABLED = os.getenv("LLM_MODEL", "true")
+AI_ENABLED = os.getenv("DG_AI_ENABLED", "false").strip().lower() in ("1", "true", "yes", "on")
 
 # timeout／重試設定（規格書 3.6.8）
-LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "20"))
+#
+# 2026-09 第十二輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.18）：使用者反映
+# 「發現修改過後AI詢問都會超過時間…都顯示AI失敗」——第十一輪（§7.17）為了
+# 讓「🎯 AI 補充建議」區塊能具體列出 PPE 裝備類別、並新增醫療／急救技術
+# 建議，system_prompt 變長、要求 AI 產出的內容也變多，analyze_incident()
+# 的 max_tokens 上限同時由 4500 調高為 5200；LLM_PROVIDER=perplexity 的
+# sonar-pro 模型本身還會先做即時網路搜尋才開始生成回覆，因此需要的總時間
+# 也比先前明顯拉長。原本 20 秒的預設 timeout 在改動前已經偏緊，改動後這些
+# 相加起來就經常超過 20 秒，被 OpenAI SDK 判定逾時（APITimeoutError），
+# 落入下方 except 區塊回傳「⚠️ AI 服務暫時無法使用（連線逾時...）」，也就
+# 是使用者看到的「AI 失敗」。這純粹是逾時「數值」的調校，不涉及任何安全
+# 判斷內容的放寬或限縮（規格書 3.6.8 本身要求的「具備 timeout」這項安全
+# 措施完全不變，只是把數值調整為符合 sonar-pro 實際回應時間的合理值），
+# 因此不需要 AskUserQuestion，直接修正：預設值由 20 秒調高為 60 秒（可由
+# 管理者以環境變數 LLM_TIMEOUT_SECONDS 覆寫調整，例如網路更慢的環境可
+# 再調高）。
+LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "60"))
 LLM_MAX_RETRIES     = int(os.getenv("LLM_MAX_RETRIES", "1"))
 
 # Provider allowlist（規格書 3.6.7）——目前僅開放已知兩家，未來由管理者擴充/設定檔管理
@@ -74,6 +90,7 @@ def get_llm_response(
     user_message: str,
     temperature: float = 0.2,
     max_tokens: int = 2048,
+    history: list[dict] | None = None,
 ) -> str:
     """
     統一 LLM 呼叫介面。
@@ -85,6 +102,18 @@ def get_llm_response(
 
     回傳的字串一律應被上層標記為「非權威說明」，不得作為唯一應變依據，
     且呼叫端不得以此結果覆寫任何 deterministic engine 的判定。
+
+    2026-09 第十一輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.17）：新增選填
+    history 參數，供 ai_analyzer.ask_incident_followup()（「AI 事故分析」
+    頁面新增的多輪追問功能）使用——呼叫端可傳入先前對話的
+    [{"role": "user"/"assistant", "content": str}, ...] 歷史紀錄，本函式會
+    將其插入 system prompt 與本次 user_message 之間一併送出，讓 LLM 能
+    「記得」先前的問題與回答內容，使用者可持續針對同一次分析追問下去。
+    本模組仍不做任何安全過濾或判斷——history 內容是否合乎規則、是否要
+    附加「緊急事故戰術建議擴充規則」等，一律由上層（ai_analyzer.py）
+    負責組裝；本函式僅原樣轉送給外部 LLM API，並在轉送前只保留
+    role/content 兩個欄位（防禦性過濾，避免呼叫端不慎夾帶其他欄位一併
+    送往外部 API）。未提供 history 時行為與先前完全相同。
     """
     if not AI_ENABLED:
         return (
@@ -96,12 +125,17 @@ def get_llm_response(
     for attempt in range(LLM_MAX_RETRIES + 1):
         try:
             client = _get_client()
+            messages = [{"role": "system", "content": system_prompt}]
+            if history:
+                messages.extend(
+                    {"role": m.get("role"), "content": m.get("content")}
+                    for m in history
+                    if m.get("role") in ("user", "assistant") and m.get("content")
+                )
+            messages.append({"role": "user", "content": user_message})
             response = client.chat.completions.create(
                 model=LLM_MODEL,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
+                messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
             )

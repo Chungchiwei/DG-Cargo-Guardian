@@ -12,7 +12,7 @@ from itertools import combinations
 import streamlit as st
 from ems_engine       import query_ems, format_ems_report
 from ai_analyzer      import (
-    analyze_incident, ask_dg_question, INCIDENT_SOP_MAP,
+    analyze_incident, ask_dg_question, ask_incident_followup, INCIDENT_SOP_MAP,
     check_segregation_deterministic, explain_segregation_result,
     judge_segregation_with_ai,
 )
@@ -681,16 +681,16 @@ with st.sidebar:
     # 先前使用 https://img.icons8.com/... 的外部圖示，船上無網路時會顯示破圖）
     st.markdown(
         '<div class="whl-badge-wrap">'
-        '<div class="whl-badge">DCMS</div>'
+        '<div class="whl-badge">WHL</div>'
         '<div class="whl-wordmark">'
         '<div class="line1">Wan Hai Lines</div>'
-        '<div class="line2">DG Cargo Management System</div>'
+        '<div class="line2">DG Cargo Guardian</div>'
         '</div></div>',
         unsafe_allow_html=True
     )
     st.markdown(
         "<div style='color:#94A3B8; font-size:0.85rem; margin-top:-0.4rem;'>"
-        "WHL 船舶危險品管理系統</div>",
+        "海運危險品應急處置輔助系統</div>",
         unsafe_allow_html=True
     )
     st.divider()
@@ -699,9 +699,9 @@ with st.sidebar:
         "📋 功能選單",
         options=[
             "🔍 EMS 快速查詢",
-            "🤖 AI 事故應急處置分析",
-            "🔄 AI 積載隔離檢查",
-            "🗺️ Bay Plan Review",
+            "🤖 AI 事故分析",
+            "🔄 積載隔離檢查",
+            "🗺️ DG Bay Plan",
             "💬 自由問答",
         ],
         label_visibility="collapsed"
@@ -748,7 +748,7 @@ with st.sidebar:
         "⚠️ 本系統為決策輔助工具，僅供參考<br>"
         "實際操作請依船上核准之 IMDG Code、EmS Guide、MFAG 及公司 SMS 程序，"
         "最終決定權屬船長<br>"
-        "Wan Hai Lines © DG Cargo Management System"
+        "Wan Hai Lines © DG Cargo Guardian"
         "</div>",
         unsafe_allow_html=True
     )
@@ -870,14 +870,14 @@ if page == "🔍 EMS 快速查詢":
             if data.get("legacy_emergency_action_available"):
                 st.markdown(
                     '<div class="warning-banner">'
-                    '⚠️ 以下為資料來源為IMDG Code 2024 Supplement，'
-                    '僅供快速參考；正式處置仍須以船上核准之 IMDG Code、'
-                    'EmS Guide、及公司 SMS 程序，並經船長／大副確認為準'
+                    '⚠️ 以下為系統舊版資料，尚未依 IMDG Code 2024 Supplement 核對來源，'
+                    '不是官方逐字條文，僅供快速參考；正式處置仍須以船上核准之 IMDG Code、'
+                    'EmS Guide、MFAG 及公司 SMS 程序，並經船長／大副確認為準'
                     '</div>',
                     unsafe_allow_html=True
                 )
-                st.markdown("#### 🔥 應急處置指引（舊版參考資料）")
-                tab_fire, tab_spill, tab_first_aid = st.tabs(["🔥 滅火 Fire", "💧 洩漏 Spillage", "🏥 急救 First Aid"])
+                st.markdown("#### 🔥 應急處置指引")
+                tab_fire, tab_spill, tab_first_aid = st.tabs(["🔥 滅火處置 Fire", "💧 洩漏處置 Spillage", "🏥 應急處置 First Aid"])
                 with tab_fire:
                     st.markdown(legacy_ea.get("fire") or "（無資料）")
                 with tab_spill:
@@ -885,16 +885,16 @@ if page == "🔍 EMS 快速查詢":
                 with tab_first_aid:
                     st.markdown(legacy_ea.get("first_aid") or "（無資料）")
 
-                with st.expander("🧯 ERG2024 應急程序對照（美國/加拿大/墨西哥運輸主管機關公開資料）"):
-                    st.markdown(f"**滅火 Fire**：{ea.get('fire', '')}")
-                    st.markdown(f"**洩漏 Spillage**：{ea.get('spillage', '')}")
-                    st.markdown(f"**急救 First Aid**：{ea.get('first_aid', '')}")
+                with st.expander("🧯 ERG2024 應急程序對照"):
+                    st.markdown(f"**滅火處置 Fire**：{ea.get('fire', '')}")
+                    st.markdown(f"**洩漏處置 Spillage**：{ea.get('spillage', '')}")
+                    st.markdown(f"**急救處置 First Aid**：{ea.get('first_aid', '')}")
                     _render_ea_source_caption()
             else:
                 st.info(
-                    f"🔥 **滅火**：{ea.get('fire', '')}\n\n"
-                    f"💧 **洩漏**：{ea.get('spillage', '')}\n\n"
-                    f"🏥 **急救**：{ea.get('first_aid', '')}"
+                    f"🔥 **滅火處置**：{ea.get('fire', '')}\n\n"
+                    f"💧 **洩漏處置**：{ea.get('spillage', '')}\n\n"
+                    f"🏥 **急救處置**：{ea.get('first_aid', '')}"
                 )
                 _render_ea_source_caption()
 
@@ -962,13 +962,13 @@ if page == "🔍 EMS 快速查詢":
 # ══════════════════════════════════════════════════════════════
 # 頁面 2：AI 事故分析
 # ══════════════════════════════════════════════════════════════
-elif page == "🤖 AI 事故應急處置分析":
+elif page == "🤖 AI 事故分析":
 
-    st.markdown('<div class="main-title">🤖 AI 事故應急處置分析</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">🤖 AI 事故分析</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">描述事故情境，AI 根據 IMDG 資料給出應急建議</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="warning-banner">'
-        '⚠️ AI 建議可能有錯誤，緊急情況請依船上應急聯絡清單聯繫項專業單位尋求協助'
+        '⚠️ AI 建議可能有錯誤，緊急情況請依船上核准之應急聯絡清單聯繫'
         '</div>',
         unsafe_allow_html=True
     )
@@ -1052,52 +1052,102 @@ elif page == "🤖 AI 事故應急處置分析":
             # 不同的UN 號碼」——輸入框改為可接受多個 UN 號碼（以逗號／頓號／
             # 分號／空白／換行分隔皆可），上方複選的貨櫃 UN 號碼會自動一併
             # 納入分析，兩者取聯集、不重複。
+            #
+            # 2026-09 第十輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.16.2）：
+            # 使用者要求把碰撞／擱淺／人員落水／電力故障等一般船舶緊急事故
+            # 也納入本頁面，這類事故通常與特定危險品 UN 號碼無關，因此本欄位
+            # 明確標示「選填」，未輸入也能送出分析（見下方 analyze_btn 邏輯）。
             un_input = st.text_input(
-                "UN 號碼（可輸入多個，以逗號或空白分隔）",
+                "UN 號碼（選填；如涉及危險品可輸入多個，以逗號或空白分隔）",
                 value=st.session_state.last_un,
-                placeholder="例如：1203, 3077, 1830"
+                placeholder="例如：1203, 3077, 1830（碰撞、擱淺、人員落水等一般事故可留空）"
             )
         with col2:
+            # 2026-09 第十輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.16）：使用者
+            # 重新上傳同一批 17 份官方檢查表，要求「確定這幾個程序書都有被
+            # 加進去幫助AI判斷事故」——審查發現資料本身早已完整，但下拉選單
+            # 只涵蓋 6 個危險品貨櫃相關類型，其餘 11 個編號完全無法選取。
+            # 現已擴充為全部 17 個 WHL SOP 類型＋4 個既有一般選項，依「危險品
+            # 貨櫃相關／火災與動力／船體與航行／人員／一般」分組排列，方便
+            # 在選項變多後仍能快速找到需要的事故類型。
             incident_type = st.selectbox(
                 "事故類型",
                 options=[
+                    # ── 危險品貨櫃相關 ──
                     "deck_container_fire",
                     "hold_container_fire",
-                    "engine_room_fire",
                     "cargo_leakage",
                     "dg_fire_leakage",
                     "container_overboard",
                     "fire",
                     "spillage",
+                    # ── 火災／機艙／動力 ──
+                    "engine_room_fire",
+                    "main_engine_breakdown",
+                    "blackout",
+                    # ── 船體／航行事故 ──
+                    "hull_damage",
+                    "collision",
+                    "grounding",
+                    "touch_bottom",
+                    "mooring_rope_fouling",
+                    "gantry_crane_damage",
+                    "flooding_cargo_hold",
+                    # ── 人員 ──
+                    "man_overboard",
+                    "crew_injured",
                     "first_aid",
+                    # ── 一般 ──
                     "general",
                 ],
                 format_func=lambda x: {
-                    "deck_container_fire": "🔥 甲板貨櫃失火（WHL 3-3）",
-                    "hold_container_fire": "🔥 貨艙貨櫃失火（WHL 3-4）",
-                    "engine_room_fire":    "🔥 機艙失火（WHL 1-5）",
-                    "cargo_leakage":       "💧 貨櫃洩漏 氣體/液體（WHL 3-5）",
-                    "dg_fire_leakage":     "☣️ 危險貨櫃事故 失火／洩漏（WHL 3-5-1）",
-                    "container_overboard": "📦 貨櫃落海/傾倒/位移（WHL 3-2）",
-                    "fire":                "🔥 火災事故（一般）",
-                    "spillage":            "💧 洩漏事故（一般）",
-                    "first_aid":           "🏥 人員傷亡急救（MFAG）",
-                    "general":             "📋 一般查詢",
+                    "deck_container_fire":   "🔥 甲板貨櫃失火（WHL 3-3）",
+                    "hold_container_fire":   "🔥 貨艙貨櫃失火（WHL 3-4）",
+                    "cargo_leakage":         "💧 貨櫃洩漏 氣體/液體（WHL 3-5）",
+                    "dg_fire_leakage":       "☣️ 危險貨櫃事故 失火／洩漏（WHL 3-5-1）",
+                    "container_overboard":   "📦 貨櫃落海/傾倒/位移（WHL 3-2）",
+                    "fire":                  "🔥 火災事故（一般）",
+                    "spillage":              "💧 洩漏事故（一般）",
+                    "engine_room_fire":      "🔥 機艙失火（WHL 1-5）",
+                    "main_engine_breakdown": "⚙️ 主機故障（WHL 1-7）",
+                    "blackout":              "⚡ 電力故障（WHL 1-8）",
+                    "hull_damage":           "🚢 船殼受損（WHL 1-1）",
+                    "collision":             "💥 碰撞事故（WHL 1-2）",
+                    "grounding":             "⚓ 擱淺事故（WHL 1-3）",
+                    "touch_bottom":          "⚓ 觸底事故（WHL 1-4）",
+                    "mooring_rope_fouling":  "🪢 纜繩／螺旋槳纏繞（WHL 1-6）",
+                    "gantry_crane_damage":   "🏗️ 吊車事故（WHL 3-6）",
+                    "flooding_cargo_hold":   "🌊 貨艙浸水（WHL 3-1）",
+                    "man_overboard":         "🆘 人員落水（WHL 2-1）",
+                    "crew_injured":          "🏥 人員受傷（WHL 2-2）",
+                    "first_aid":             "🏥 人員傷亡急救（MFAG）",
+                    "general":               "📋 一般查詢",
                 }[x],
             )
 
-        # SOP 參考標籤
+        # SOP 參考標籤（2026-09 第十輪回饋：補齊全部 17 個 WHL SOP 編號）
         sop_badges = {
-            "deck_container_fire": ("3-3", "#dc2626"),
-            "hold_container_fire": ("3-4", "#b45309"),
-            "engine_room_fire":    ("1-5", "#7c3aed"),
-            "cargo_leakage":       ("3-5", "#0369a1"),
-            "dg_fire_leakage":     ("3-5-1", "#991b1b"),
-            "container_overboard": ("3-2", "#047857"),
-            "fire":                ("IMDG", "#dc2626"),
-            "spillage":            ("IMDG", "#0369a1"),
-            "first_aid":           ("MFAG", "#047857"),
-            "general":             ("IMDG", "#475569"),
+            "deck_container_fire":   ("3-3", "#dc2626"),
+            "hold_container_fire":   ("3-4", "#b45309"),
+            "cargo_leakage":         ("3-5", "#0369a1"),
+            "dg_fire_leakage":       ("3-5-1", "#991b1b"),
+            "container_overboard":   ("3-2", "#047857"),
+            "fire":                  ("IMDG", "#dc2626"),
+            "spillage":              ("IMDG", "#0369a1"),
+            "engine_room_fire":      ("1-5", "#7c3aed"),
+            "main_engine_breakdown": ("1-7", "#7c3aed"),
+            "blackout":              ("1-8", "#7c3aed"),
+            "hull_damage":           ("1-1", "#475569"),
+            "collision":             ("1-2", "#475569"),
+            "grounding":             ("1-3", "#475569"),
+            "touch_bottom":          ("1-4", "#475569"),
+            "mooring_rope_fouling":  ("1-6", "#475569"),
+            "gantry_crane_damage":   ("3-6", "#475569"),
+            "flooding_cargo_hold":   ("3-1", "#0369a1"),
+            "man_overboard":         ("2-1", "#dc2626"),
+            "crew_injured":          ("2-2", "#047857"),
+            "first_aid":             ("MFAG", "#047857"),
+            "general":               ("IMDG", "#475569"),
         }
         badge_code, badge_color = sop_badges.get(incident_type, ("IMDG", "#475569"))
         st.markdown(
@@ -1135,19 +1185,31 @@ elif page == "🤖 AI 事故應急處置分析":
         if u and u not in all_un_numbers:
             all_un_numbers.append(u)
 
-    if analyze_btn and all_un_numbers:
+    # 2026-09 第十輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.16.2）：先前必須
+    # 輸入至少一個 UN 號碼才能送出分析，導致碰撞、擱淺、人員落水、電力故障
+    # 等與特定危險品無關的一般船舶緊急事故完全無法使用本頁面。UN 號碼改為
+    # 選填，只要按下按鈕即可送出分析；analyze_incident() 本身已能正確處理
+    # 未提供 UN 號碼的情況（見 ai_analyzer.py 第 15c 項變更紀錄）。
+    if analyze_btn:
         st.session_state.last_un = un_input.strip()
 
-        ems_lookup = {u: query_ems(u) for u in all_un_numbers}
-        for u in all_un_numbers:
-            data = ems_lookup[u]
-            if data["found"]:
-                col_a, col_b, col_c = st.columns(3)
-                col_a.metric("UN 號碼",  data["un_number"])
-                col_b.metric("物質名稱", data["proper_shipping_name"])
-                col_c.metric("危險品類別", f"Class {data['hazard_class']}")
-            else:
-                st.warning(f"⚠️ UN{u}：資料庫查無此 UN 號碼")
+        if all_un_numbers:
+            ems_lookup = {u: query_ems(u) for u in all_un_numbers}
+            for u in all_un_numbers:
+                data = ems_lookup[u]
+                if data["found"]:
+                    col_a, col_b, col_c = st.columns(3)
+                    col_a.metric("UN 號碼",  data["un_number"])
+                    col_b.metric("物質名稱", data["proper_shipping_name"])
+                    col_c.metric("危險品類別", f"Class {data['hazard_class']}")
+                else:
+                    st.warning(f"⚠️ UN{u}：資料庫查無此 UN 號碼")
+        else:
+            st.info(
+                "ℹ️ 本次未提供 UN 號碼，AI 將依事故類型與對應官方檢查表提供一般性"
+                "應變建議（適用於碰撞、擱淺、人員落水、電力故障等與特定危險品無關"
+                "的一般船舶緊急事故）。"
+            )
 
         st.markdown("---")
         st.markdown("#### 🤖 AI 應急建議")
@@ -1177,30 +1239,97 @@ elif page == "🤖 AI 事故應急處置分析":
             vessel_context = {"containers": containers}
 
         with st.spinner("AI 正在分析事故情境..."):
-            result = analyze_incident(
+            result, ai_ctx = analyze_incident(
                 un_numbers      = all_un_numbers,
                 incident_type   = incident_type,
                 additional_info = additional,
                 vessel_context  = vessel_context,
+                return_context  = True,
             )
 
-        st.markdown('<div class="ai-response-wrapper">', unsafe_allow_html=True)
-        st.markdown(result)
-        st.markdown('</div>', unsafe_allow_html=True)
+        # 2026-09 第十一輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.17）：使用者
+        # 要求「AI連續提問…會記憶原本的問題跟回答內容，讓使用者繼續追問
+        # 下去」。每次按下「開始 AI 分析」視為新的一輪，重新初始化本次分析
+        # 專屬的對話狀態（system_prompt／對話紀錄），避免把「上一次事故」的
+        # 追問內容誤植入新的事故分析。對話紀錄第一筆固定存放本次分析實際
+        # 送給 AI 的 user_prompt（不在畫面上顯示，僅供後續追問沿用同一套
+        # 背景資料），之後每輪追問的問題與回答依序附加，見下方「💬 繼續
+        # 追問」區塊與 ask_incident_followup()。
+        st.session_state.ai_incident_system_prompt = ai_ctx["system_prompt"]
+        st.session_state.ai_incident_conversation = [
+            {"role": "user", "content": ai_ctx["user_prompt"]},
+            {"role": "assistant", "content": result},
+        ]
+        st.session_state.ai_incident_followup_key_version = 0
 
-    elif analyze_btn and not all_un_numbers:
-        st.warning("⚠️ 請輸入至少一個 UN 號碼，或從上方艙單選擇至少一個貨櫃")
+    # 2026-09 第十一輪回饋（見 docs/KNOWN_LIMITATIONS.md §7.17）：結果與追問
+    # 對話一律依 st.session_state 呈現（而非僅在 analyze_btn 被按下的那次
+    # rerun 才顯示），確保使用者在下方輸入追問問題、觸發新的 Streamlit
+    # rerun 後，先前的分析結果與對話紀錄仍會持續顯示。
+    if st.session_state.get("ai_incident_conversation"):
+        st.markdown("---")
+        st.markdown("#### 🤖 AI 應急建議")
+
+        for msg in st.session_state.ai_incident_conversation:
+            if msg["role"] == "assistant":
+                st.markdown('<div class="ai-response-wrapper">', unsafe_allow_html=True)
+                st.markdown(msg["content"])
+                st.markdown('</div>', unsafe_allow_html=True)
+            elif msg["role"] == "user" and msg.get("display"):
+                # 僅顯示「追問」這類使用者可讀的簡短問題，第一筆送給 AI 的
+                # user_prompt（完整背景資料，含已授權檢查表全文等）不在畫面
+                # 上顯示，避免畫面被冗長的內部提示詞內容淹沒。
+                st.markdown(f"**🙋 追問：** {msg['display']}")
+
+        st.markdown("##### 💬 繼續追問")
+        st.caption("可針對同一次分析繼續追問細節（例如：剛剛提到的 PPE 裝備要怎麼取得、某個步驟可以再詳細說明嗎）。")
+
+        # 追問輸入框使用「版本化」的 key（ai_incident_followup_input_v{N}）。
+        # 實測發現本專案使用的 Streamlit 版本對一般（非 st.form）文字輸入框，
+        # 單純刪除 st.session_state 中對應的 key 再 st.rerun()，前端輸入框
+        # 內容不會確實清空（前端元件會保留使用者先前輸入的本地值）。改為
+        # 每次成功送出追問後，遞增版本號、改用新的 widget key，讓 Streamlit
+        # 視為全新的輸入框元件（保證從空白開始），藉此可靠地清空輸入框，
+        # 避免使用者誤以為上一個問題還沒送出而重複點擊。
+        followup_key_version = st.session_state.get("ai_incident_followup_key_version", 0)
+        followup_question = st.text_input(
+            "輸入追問內容",
+            key=f"ai_incident_followup_input_v{followup_key_version}",
+            placeholder="例如：剛剛提到的 PPE 防護裝備，船上通常放在哪裡？",
+            label_visibility="collapsed",
+        )
+        followup_btn = st.button("➕ 送出追問", key="ai_incident_followup_btn")
+
+        if followup_btn:
+            question = (followup_question or "").strip()
+            if not question:
+                st.warning("⚠️ 請先輸入追問內容再送出。")
+            else:
+                with st.spinner("AI 正在思考追問..."):
+                    followup_answer = ask_incident_followup(
+                        system_prompt         = st.session_state.ai_incident_system_prompt,
+                        conversation_history   = st.session_state.ai_incident_conversation,
+                        followup_question      = question,
+                    )
+                st.session_state.ai_incident_conversation.append(
+                    {"role": "user", "content": question, "display": question}
+                )
+                st.session_state.ai_incident_conversation.append(
+                    {"role": "assistant", "content": followup_answer}
+                )
+                st.session_state.ai_incident_followup_key_version = followup_key_version + 1
+                st.rerun()
 
 
 # ══════════════════════════════════════════════════════════════
 # 頁面 3：積載隔離檢查
 # ══════════════════════════════════════════════════════════════
-elif page == "🔄 AI 積載隔離檢查":
+elif page == "🔄 積載隔離檢查":
 
-    st.markdown('<div class="main-title">🔄 AI 積載隔離檢查</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">🔄 積載隔離檢查</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">輸入 UN 號碼與貨櫃位置，檢查是否違反 IMDG 隔離規定</div>', unsafe_allow_html=True)
 
-    with st.expander("📖 貨櫃位置說明"):
+    with st.expander("📖 貨櫃位置格式說明 (BBRRTT)"):
         st.markdown("""
         | 欄位 | 說明 | 範例 |
         |------|------|------|
@@ -1217,7 +1346,7 @@ elif page == "🔄 AI 積載隔離檢查":
     # 確認數值一致，見 segregation_engine.py 檔案開頭說明），僅供人工目視
     # 對照，不是新的判斷邏輯——下方「隔離檢查結果」仍完全依既有 deterministic
     # engine／AI 判斷顯示，此表不參與任何計算。
-    with st.expander("📋 附表三　危險品隔離表", expanded=False):
+    with st.expander("📋 附表三　危險品隔離表（原文對照，供人工核對）", expanded=False):
         st.caption(
             "公司文件「附表三 危險品隔離表」原文重現，"
             "數值已與系統一般類別隔離表逐格核對一致。"
@@ -1487,10 +1616,10 @@ elif page == "🔄 AI 積載隔離檢查":
             if ai_uncertain_count > 0:
                 st.warning(f"❓ 共 {ai_uncertain_count} / {pairs_count} 組配對 AI 判定為「無法確定」，請人工查閱下方系統資料並依船上核准文件確認。")
             if ai_violation_count == 0 and ai_uncertain_count == 0:
-                st.success(f"✅ 共檢查 {pairs_count} 組配對，AI 判定均未發現隔離問題。")
+                st.success(f"✅ 共檢查 {pairs_count} 組配對，AI 判定均未發現隔離問題（仍為非權威判斷，請見下方各組詳情）。")
             st.caption(
-                "⚠️ 以上為 AI 直接產生的判斷，可能有誤，"
-                "最終決定權屬大副／船長覆核。"
+                "⚠️ 以上為 AI 直接產生的判斷，非公司核准之權威合規判定，可能有誤，"
+                "最終決定權屬大副／船長；下方各組另附 deterministic 系統資料供覆核。"
             )
             with st.expander("⚫ deterministic 系統資料摘要（次要參考，非畫面主要結論）"):
                 if violation_count > 0:
@@ -1567,7 +1696,7 @@ elif page == "🔄 AI 積載隔離檢查":
                 if not ai_judge and AI_ENABLED:
                     # 理論上不會發生（AI_ENABLED 時一定會計算 ai_judge），保留作為
                     # fail-safe：若真的發生，仍提供舊版「AI 轉譯」功能不中斷使用。
-                    if st.toggle("🤖 AI說明", key=f"seg_ai_toggle_{res_i}"):
+                    if st.toggle("🤖 顯示 AI 文字說明（非權威，僅轉譯上方結果）", key=f"seg_ai_toggle_{res_i}"):
                         st.markdown(explain_segregation_result(seg))
 
         st.markdown("---")
@@ -1584,9 +1713,9 @@ elif page == "🔄 AI 積載隔離檢查":
 # ══════════════════════════════════════════════════════════════
 # 頁面 4：DG Bay Plan
 # ══════════════════════════════════════════════════════════════
-elif page == "🗺️ Bay Plan Review":
+elif page == "🗺️ DG Bay Plan":
 
-    st.markdown('<div class="main-title">🗺️ Bay Plan Review</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">🗺️ DG Bay Plan</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="sub-title">上傳 DG 艙單，自動產生滅火介質視覺化積載圖</div>',
         unsafe_allow_html=True
@@ -1605,7 +1734,7 @@ elif page == "🗺️ Bay Plan Review":
     # 官方危險標誌底色）。先前依 fire_color 紅/黃/綠上色的邏輯已因
     # fire_classifier fail-closed 而失去意義，已全面改為上述兩種並在此明確
     # 標示「僅供辨識，非風險等級」（規格書 3.5）；下方另保留系統資料狀態圖例。
-    with st.expander("🎨 Ems顏色說明", expanded=False):
+    with st.expander("🎨 色標說明", expanded=False):
         st.markdown("###### 🔥 依 EmS Fire Code 上色（預設；僅供視覺辨識，非滅火介質或風險等級）")
         st.caption(
             "依貨物的 EmS Fire Code（F-A ~ F-J，資料庫已核對來源的代碼本身）分組上色，"
@@ -2250,7 +2379,7 @@ elif page == "🗺️ Bay Plan Review":
     )
 
     if AI_ENABLED:
-        if st.button("🤖 AI說明", use_container_width=True, key="ai_risk_summary"):
+        if st.button("🤖 產生 AI 文字說明（非權威，僅整理上述事實）", use_container_width=True, key="ai_risk_summary"):
             summary_lines = [
                 f"貨物總數：{len(cargo_list)}",
                 f"待確認品名：{len(ambiguous_cargos)} 筆",
