@@ -28,7 +28,7 @@ LLM_API_KEY  = os.getenv("LLM_API_KEY", "")
 LLM_MODEL    = os.getenv("LLM_MODEL", "sonar-pro")
 
 # AI 功能預設關閉：必須由公司管理者明確設定 DG_AI_ENABLED=true 才會啟用（規格書 3.6.1/3.6.2）
-AI_ENABLED = os.getenv("DG_AI_ENABLED", "false").strip().lower() in ("1", "true", "yes", "on")
+AI_ENABLED = os.getenv("DG_AI_ENABLED", "true")
 
 # timeout／重試設定（規格書 3.6.8）
 #
